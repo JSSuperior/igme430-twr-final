@@ -1,0 +1,114 @@
+const mongoose = require('mongoose');
+const _ = require('underscore');
+
+const setName = (name) => _.escape(name).trim();
+
+const characterSchema = new mongoose.Schema({
+    // character info
+    // just need name for the sake of searching and what not
+    name: {
+        type: String,
+        required: true,
+        trim: true,
+        set: setName
+    },
+    description: {
+        type: String,
+        default: "",
+    },
+    class: {
+        type: String,
+        default: "",
+    },
+    powers: {
+        type: String,
+        default: "",
+    },
+    // maybe add a field to track uses?
+    hitpoints: {
+        type: Number,
+        default: 0,
+    },
+
+    // stat modifiers
+    strength: {
+        type: Number,
+        min: -3,
+        max: 3,
+        default: 0
+    },
+    agility: {
+        type: Number,
+        min: -3,
+        max: 3,
+        default: 0
+    },
+    presence: {
+        type: Number,
+        min: -3,
+        max: 3,
+        default: 0
+    },
+    toughness: {
+        type: Number,
+        min: -3,
+        max: 3,
+        default: 0
+    },
+    omens: {
+        type: Number,
+        default: 0,
+    },
+
+    // equiptment
+    weapon1: {
+        type: String,
+        default: "",
+    },
+    weapon2: {
+        type: String,
+        default: "",
+    },
+    armorName: {
+        type: String,
+        default: "",
+    },
+    armorRating: {
+        type: Number,
+        min: 0,
+        max: 3,
+        default: 0,
+    },
+    equipment: {
+        type: String,
+        default: "",
+    },
+    silver: {
+        type: Number,
+        default: 0,
+    },
+
+    // admin
+    // eventually if scoped right, I want to make it so that players can add their characters to a campaign
+    campaignID: {
+        type: String,
+        //required: true
+    },
+    owner: {
+        type: mongoose.Schema.ObjectId,
+        required: true,
+        ref: 'Account',
+    },
+    createdDate: {
+        type: Date,
+        default: Date.now,
+    },
+});
+
+// look into this more later
+characterSchema.statics.toAPI = (doc) => ({
+    name: doc.name,
+});
+
+const CharacterModel = mongoose.model('Character', characterSchema);
+module.exports = CharacterModel;
