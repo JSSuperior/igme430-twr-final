@@ -90,6 +90,11 @@ const characterSchema = new mongoose.Schema({
 
     // admin
     // eventually if scoped right, I want to make it so that players can add their characters to a campaign
+    characterID: {
+        type: Number,
+        required: true,
+        unique: true,
+    },
     campaignID: {
         type: String,
         //required: true

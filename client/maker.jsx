@@ -16,9 +16,11 @@ const handleDomo = (e, onDomoAdded) => {
         return false;
     }
 
+    // generate character ID
+    // do check here to see if character ID is taken
+
     helper.sendPost(e.target.action, { name, age, cheeseWheels }, onDomoAdded);
     return false;
-
 }
 
 const DomoForm = (props) => {
@@ -42,6 +44,10 @@ const DomoForm = (props) => {
         </form>
     );
 };
+
+const CharacterForm = (props) => {
+    
+}
 
 const handleDomoDelete = (e, onDomoAdded) => {
     e.preventDefault();
@@ -74,57 +80,54 @@ const DomoDelete = (props) => {
     );
 };
 
-const DomoList = (props) => {
-    const [domos, setDomos] = useState(props.domos);
+const UserCharacterList = (props) => {
+    const [characters, setCharacters] = useState(props.characters);
 
     useEffect(() => {
-        const loadDomosFromServer = async () => {
-            const response = await fetch('/getDomos');
+        const loadCharactersFromServer = async () => {
+            const response = await fetch('/getCharactersByUser');
             const data = await response.json();
-            setDomos(data.domos);
+            setCharacters(data.characters);
         };
-        loadDomosFromServer();
-    }, [props.reloadDomos]);
+        loadCharactersFromServer();
+    }, [props.reloadCharacters]);
 
-    if (domos.length === 0) {
+    if (characters.length === 0) {
         return (
-            <div className="domoList">
-                <h3 className="emptyDomo">No Domos Yet!</h3>
+            <div className="characterList">
+                <h3 className="emptyCharacter">No Characters Yet!</h3>
             </div>
         );
     }
 
-    const domoNodes = domos.map(domo => {
+    const characterNodes = characters.map(character => {
         return (
-            <div key={domo.id} className="domo">
-                <img src="/assets/img/domoface.jpeg" alt="domo face" className="domoFace" />
-                <h3 className="domoName">Name: {domo.name}</h3>
-                <h3 className="domoAge">Age: {domo.age}</h3>
-                <h3 className="domoCheeseWheels">Cheese Wheels: {domo.cheeseWheels}</h3>
+            <div key={character.id} className="characterList">
+                <h3 className="characterName">Name: {character.name}</h3>
             </div>
         );
     });
 
     return (
-        <div className="domoList">
-            {domoNodes}
+        <div className="characterList">
+            {characterNodes}
         </div>
     );
 };
 
 const App = () => {
-    const [reloadDomos, setReloadDomos] = useState(false);
+    const [reloadCharacters, setReloadCharacters] = useState(false);
 
     return (
         <div>
             <div id="makeDomo">
-                <DomoForm triggerReload={() => setReloadDomos(!reloadDomos)} />
+                <DomoForm triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
             <div id="deleteForm">
-                <DomoDelete triggerReload={() => setReloadDomos(!reloadDomos)} />
+                <DomoDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
-            <div id="domos">
-                <DomoList domos={[]} reloadDomos={reloadDomos} />
+            <div id="characters">
+                <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} />
             </div>
         </div>
     );

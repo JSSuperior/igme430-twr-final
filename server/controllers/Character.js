@@ -5,85 +5,113 @@ const characterPage = async (req, res) => {
     return res.render('app');
 }
 
+// creates initial character entry
 const createCharacter = async (req, res) => {
+    // do checks for premium here
+
     if (!req.body.name) {
         return res.status(400).json({ error: 'Name is required!' });
     }
 
+    // find a way to randomly generate unique character ID here
+    // help from this stack overflow article
+    // https://stackoverflow.com/questions/37174096/generate-unique-ids-js
+    const generateUniqueCharacterID = () => {
+        return Date.now;
+    }
+
+    // initial character data
     const characterData = {
         name: req.body.name,
-        age: req.body.age,
-        cheeseWheels: req.body.cheeseWheels,
-        owner: req.session.account._id,
-    };
+        characterID: generateUniqueCharacterID
+    }
 
     try {
-        const newDomo = new Domo(domoData);
-        await newDomo.save();
+        const newCharacter = new Character(characterData);
+        await newCharacter.save();
         //return res.json({ redirect: '/maker' });
-        return res.status(201).json({ name: newDomo.name, age: newDomo.age, cheeseWheels: newDomo.cheeseWheels });
+        return res.status(201).json({ name: newCharacter.name });
     } catch (err) {
         console.log(err);
         if (err.code === 11000) {
-            return res.status(400).json({ error: 'Domo already exists!' });
+            return res.status(400).json({ error: 'Character already exists!' });
         }
-        return res.status(500).json({ error: 'An error occured making domo!' });
+        return res.status(500).json({ error: 'An error occured making character!' });
     }
 }
 
 const editCharacter = async (req, res) => {
-    const characterData = {
-        name: req.body.name,
-        age: req.body.age,
-        cheeseWheels: req.body.cheeseWheels,
-        owner: req.session.account._id,
-    };
+    if (!req.body.characterID) {
+        return res.status(400).json({ error: 'Character ID not found!' });
+    }
 
     try {
-        const newDomo = new Domo(domoData);
-        await newDomo.save();
+        const character = await Character.findOneAndUpdate(
+            { characterID: req.body.characterID },
+            {
+                $set: { 
+                    name: req.body.name,
+                    description: req.body.description,
+                    class: req.body.class,
+                    powers: req.body.powers,
+                    hitpoints: req.body.hitpoints,
+                    strength: req.body.strength,
+                    agility: req.body.agility,
+                    presence: req.body.presence,
+                    toughness: req.body.toughness,
+                    omens: req.body.omens,
+                    weapon1: req.body.weapon1,
+                    weapon2: req.body.weapon2,
+                    armorName: req.body.armorName,
+                    armorRating: req.body.armorRating,
+                    equipment: req.body.equipment,
+                    silver: req.body.silver,
+                    campaignID: req.body.campaignID
+                 },
+            }
+        );
         //return res.json({ redirect: '/maker' });
-        return res.status(201).json({ name: newDomo.name, age: newDomo.age, cheeseWheels: newDomo.cheeseWheels });
+        //return res.status(200).json({ message: 'Character updated!' });
+        return res.status(200).json(character);
     } catch (err) {
         console.log(err);
-        if (err.code === 11000) {
-            return res.status(400).json({ error: 'Domo already exists!' });
-        }
-        return res.status(500).json({ error: 'An error occured making domo!' });
+        return res.status(500).json({ error: 'An error occured editing character!' });
     }
 }
 
 const deleteCharacter = async (req, res) => {
-    if(!req.body.name) {
-        return res.status(400).json({ error: 'Name is required!' });
+    if (!req.body.characterID) {
+        return res.status(400).json({ error: 'CharacterID is required!' });
     }
 
     try {
-        const theChosenOne = await Character.findOneAndDelete({ name: req.body.name });
+        const theChosenOne = await Character.findOneAndDelete({ characterID: req.body.characterID });
 
-        if(!theChosenOne) {
-            return res.status(400).json({error: `Character ${req.body.name} not found!`});
+        if (!theChosenOne) {
+            return res.status(400).json({ error: `Character ${req.body.characterID} not found!` });
         }
-        return res.status(200).json({ message: `Character ${req.body.name} deleted!` });
+        return res.status(200).json({ message: `Character ${req.body.characterID} deleted!` });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'An error occured deleting Character!' });
     }
 }
 
-const getCharacterByName = async (req, res) => {
-    if(!req.body.name) {
+// will change to get by id later
+const getCharacterByID = async (req, res) => {
+    // change this to be a query param
+    if (!req.query.characterID) {
         return res.status(400).json({ error: 'Name is required!' });
     }
 
     try {
         // can probably change from doc to something else later
-        const docs = await Character.find(req.body.name).lean().exec();
+        const docs = await Character.findOne(req.query.characterID).lean().exec();
 
-        return res.json({character: docs});
+        return res.json({ character: docs });
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ error: 'Error retrieving character!'});
+        return res.status(500).json({ error: 'Error retrieving character!' });
     }
 }
 
@@ -99,7 +127,7 @@ const getCharactersByCampaign = async (req, res) => {
 
 const getCharacters = async (req, res, query) => {
     try {
-        const docs = await Character.find(query).select('name').lean().exec();
+        const docs = await Character.find(query).select('name characterID').lean().exec();
 
         return res.json({ characters: docs });
     } catch (err) {
@@ -108,9 +136,12 @@ const getCharacters = async (req, res, query) => {
     }
 }
 
-// get specific character (campaign based)?
-
-// edit character
-// get specific character (user based)
-// get all characters (user based)
-// get all characters (in campaign)
+module.exports = {
+    characterPage,
+    createCharacter,
+    editCharacter,
+    deleteCharacter,
+    getCharacterByID,
+    getCharactersByUser,
+    getCharactersByCampaign,
+};
