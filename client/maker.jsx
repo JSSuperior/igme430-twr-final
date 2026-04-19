@@ -45,37 +45,94 @@ const DomoForm = (props) => {
     );
 };
 
-const CharacterForm = (props) => {
-    
-}
-
-const handleDomoDelete = (e, onDomoAdded) => {
+// Character create form
+const handleCreate = (e, onCharacterCreated) => {
     e.preventDefault();
     helper.hideError();
 
-    const name = e.target.querySelector('#deleteName').value;
+    const name = e.target.querySelector('#characterName').value;
 
-    if(!name) {
+    if (!name) {
         helper.handleError('Field required!');
         return false;
     }
 
-    helper.sendPost(e.target.action, { name }, onDomoAdded);
+    helper.sendPost(e.target.action, { name }, onCharacterCreated);
+    return false;
+}
+
+const createCharacterForm = (props) => {
+    return (
+
+        <form id="createForm"
+            onSubmit={(e) => handleCreate(e, props.triggerReload)}
+            name="characterCreateForm"
+            action="/create"
+            method="POST"
+            className="createForm"
+        >
+            <h1>
+                Character Creation Form
+            </h1>
+            <label htmlFor="name">Name: </label>
+            <input id="characterName" type="text" name="name" placeholder="Character Name" />
+            <input id="createCharacterSubmit" type="submit" value="Create Character" />
+        </form>
+    );
+}
+
+const handleEdit = (e, onCharacterEdited) => {
+
+}
+
+const editCharacterForm = (props) => {
+    return (
+        <form id="editForm"
+            onSubmit={(e) => handleEdit(e, props.triggerReload)}
+            name="characterEditForm"
+            action="/edit"
+            method="POST"
+            className="editForm"
+        >
+            
+        <label htmlFor="name">Name: </label>
+            <input id="characterName" type="text" name="name" placeholder="Character Name" />
+
+
+            <input id="createCharacterSubmit" type="submit" value="Save Changes" />
+        </form>
+    );
+}
+
+// Character Delete form
+const handleDelete = (e, onCharacterDeleted) => {
+    e.preventDefault();
+    helper.hideError();
+
+    const characterID = e.target.querySelector('#characterID').value;
+
+    if (characterID) {
+        helper.handleError('Field required!');
+        return false;
+    }
+
+    helper.sendPost(e.target.action, { characterID }, onCharacterDeleted);
+    return false;
 }
 
 const DomoDelete = (props) => {
     return (
-        <form id="domoDelete"
-        onSubmit={(e) => handleDomoDelete(e, props.triggerReload)}
-        name="domoDelete"
-        action="/delete"
-        method="POST"
-        className="domoDelete" 
+        <form id="deleteForm"
+            onSubmit={(e) => handleDelete(e, props.triggerReload)}
+            name="characterDeleteForm"
+            action="/delete"
+            method="POST"
+            className="deleteForm"
         >
-            <label htmlFor="name">Name: </label>
-            <input id="deleteName" type="text" name="name" placeholder="Domo Name" />
+            <label htmlFor="id">Character ID: </label>
+            <input id="characterID" type="number" name="id" placeholder="Character ID Number" />
 
-            <input className="deleteDomoSubmit" type="submit" value="Delete Domo" />
+            <input className="deleteCharacterSubmit" type="submit" value="Delete Character" />
         </form>
     );
 };
@@ -113,6 +170,21 @@ const UserCharacterList = (props) => {
             {characterNodes}
         </div>
     );
+};
+
+// contains a box for campaingn ID and when entered will refresh with all characters in campaign 
+const CampaignCharacterList = (props) => {
+    const [campaignID, setCampaignID] = useState(props.campaignID);
+    const [characters, setCharacters] = useState(props.characters);
+
+    useEffect(() => {
+        const loadCharactersFromServer = async () => {
+            const response = await fetch('/getCharactersByUser', {
+                
+            });
+        };
+        loadCharactersFromServer();
+    }, [props.reloadCharacters]);
 };
 
 const App = () => {
