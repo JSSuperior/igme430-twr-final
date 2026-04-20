@@ -3,47 +3,47 @@ const React = require('react');
 const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
 
-const handleDomo = (e, onDomoAdded) => {
-    e.preventDefault();
-    helper.hideError();
+// const handleDomo = (e, onDomoAdded) => {
+//     e.preventDefault();
+//     helper.hideError();
 
-    const name = e.target.querySelector('#domoName').value;
-    const age = e.target.querySelector('#domoAge').value;
-    const cheeseWheels = e.target.querySelector('#domoCheeseWheels').value;
+//     const name = e.target.querySelector('#domoName').value;
+//     const age = e.target.querySelector('#domoAge').value;
+//     const cheeseWheels = e.target.querySelector('#domoCheeseWheels').value;
 
-    if (!name || !age || !cheeseWheels) {
-        helper.handleError('All fields are required');
-        return false;
-    }
+//     if (!name || !age || !cheeseWheels) {
+//         helper.handleError('All fields are required');
+//         return false;
+//     }
 
-    // generate character ID
-    // do check here to see if character ID is taken
+//     // generate character ID
+//     // do check here to see if character ID is taken
 
-    helper.sendPost(e.target.action, { name, age, cheeseWheels }, onDomoAdded);
-    return false;
-}
+//     helper.sendPost(e.target.action, { name, age, cheeseWheels }, onDomoAdded);
+//     return false;
+// }
 
-const DomoForm = (props) => {
-    return (
-        <form id="domoForm"
-            onSubmit={(e) => handleDomo(e, props.triggerReload)}
-            name="domoForm"
-            action="/maker"
-            method="POST"
-            className="domoForm"
-        >
-            <label htmlFor="name">Name: </label>
-            <input id="domoName" type="text" name="name" placeholder="Domo Name" />
+// const DomoForm = (props) => {
+//     return (
+//         <form id="domoForm"
+//             onSubmit={(e) => handleDomo(e, props.triggerReload)}
+//             name="domoForm"
+//             action="/maker"
+//             method="POST"
+//             className="domoForm"
+//         >
+//             <label htmlFor="name">Name: </label>
+//             <input id="domoName" type="text" name="name" placeholder="Domo Name" />
 
-            <label htmlFor="age">Age: </label>
-            <input id="domoAge" type="number" min="0" name="age" />
+//             <label htmlFor="age">Age: </label>
+//             <input id="domoAge" type="number" min="0" name="age" />
 
-            <label htmlFor="cheeseWheels">Cheese Wheels: </label>
-            <input id="domoCheeseWheels" type="number" min="0" name="cheeseWheels" />
-            <input className="makeDomoSubmit" type="submit" value="Make Domo" />
-        </form>
-    );
-};
+//             <label htmlFor="cheeseWheels">Cheese Wheels: </label>
+//             <input id="domoCheeseWheels" type="number" min="0" name="cheeseWheels" />
+//             <input className="makeDomoSubmit" type="submit" value="Make Domo" />
+//         </form>
+//     );
+// };
 
 // Character create form
 const handleCreate = (e, onCharacterCreated) => {
@@ -57,11 +57,13 @@ const handleCreate = (e, onCharacterCreated) => {
         return false;
     }
 
+    console.log(name);
+
     helper.sendPost(e.target.action, { name }, onCharacterCreated);
     return false;
 }
 
-const createCharacterForm = (props) => {
+const CreateCharacter = (props) => {
     return (
 
         <form id="createForm"
@@ -94,8 +96,8 @@ const editCharacterForm = (props) => {
             method="POST"
             className="editForm"
         >
-            
-        <label htmlFor="name">Name: </label>
+
+            <label htmlFor="name">Name: </label>
             <input id="characterName" type="text" name="name" placeholder="Character Name" />
 
 
@@ -111,7 +113,7 @@ const handleDelete = (e, onCharacterDeleted) => {
 
     const characterID = e.target.querySelector('#characterID').value;
 
-    if (characterID) {
+    if (!characterID) {
         helper.handleError('Field required!');
         return false;
     }
@@ -120,7 +122,7 @@ const handleDelete = (e, onCharacterDeleted) => {
     return false;
 }
 
-const DomoDelete = (props) => {
+const CharacterDelete = (props) => {
     return (
         <form id="deleteForm"
             onSubmit={(e) => handleDelete(e, props.triggerReload)}
@@ -129,6 +131,9 @@ const DomoDelete = (props) => {
             method="POST"
             className="deleteForm"
         >
+            <h1>
+                Character Deletion Form
+            </h1>
             <label htmlFor="id">Character ID: </label>
             <input id="characterID" type="number" name="id" placeholder="Character ID Number" />
 
@@ -142,7 +147,7 @@ const UserCharacterList = (props) => {
 
     useEffect(() => {
         const loadCharactersFromServer = async () => {
-            const response = await fetch('/getCharactersByUser');
+            const response = await fetch('/getByUser');
             const data = await response.json();
             setCharacters(data.characters);
         };
@@ -161,6 +166,7 @@ const UserCharacterList = (props) => {
         return (
             <div key={character.id} className="characterList">
                 <h3 className="characterName">Name: {character.name}</h3>
+                <h3 className="characterID">ID: {character.characterID}</h3>
             </div>
         );
     });
@@ -180,7 +186,7 @@ const CampaignCharacterList = (props) => {
     useEffect(() => {
         const loadCharactersFromServer = async () => {
             const response = await fetch('/getCharactersByUser', {
-                
+
             });
         };
         loadCharactersFromServer();
@@ -192,17 +198,30 @@ const App = () => {
 
     return (
         <div>
-            <div id="makeDomo">
-                <DomoForm triggerReload={() => setReloadCharacters(!reloadCharacters)} />
+            <div id="makeCharacter">
+                <CreateCharacter triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
-            <div id="deleteForm">
-                <DomoDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
+            <div id="deleteCharacter">
+                <CharacterDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
             <div id="characters">
                 <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} />
             </div>
         </div>
     );
+    // return (
+    //     <div>
+    //         <div id="makeDomo">
+    //             <DomoForm triggerReload={() => setReloadCharacters(!reloadCharacters)} />
+    //         </div>
+    //         <div id="deleteForm">
+    //             <DomoDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
+    //         </div>
+    //         <div id="characters">
+    //             <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} />
+    //         </div>
+    //     </div>
+    // );
 };
 
 const init = () => {

@@ -17,18 +17,20 @@ const createCharacter = async (req, res) => {
     // help from this stack overflow article
     // https://stackoverflow.com/questions/37174096/generate-unique-ids-js
     const generateUniqueCharacterID = () => {
-        return Date.now;
+        return Date.now();
     }
 
     // initial character data
     const characterData = {
         name: req.body.name,
-        characterID: generateUniqueCharacterID
+        characterID: generateUniqueCharacterID(),
+        owner: req.session.account._id,
     }
 
     try {
         const newCharacter = new Character(characterData);
         await newCharacter.save();
+        console.log(newCharacter);
         //return res.json({ redirect: '/maker' });
         return res.status(201).json({ name: newCharacter.name });
     } catch (err) {
@@ -101,7 +103,7 @@ const deleteCharacter = async (req, res) => {
 const getCharacterByID = async (req, res) => {
     // change this to be a query param
     if (!req.query.characterID) {
-        return res.status(400).json({ error: 'Name is required!' });
+        return res.status(400).json({ error: 'Character ID is required!' });
     }
 
     try {
@@ -117,10 +119,23 @@ const getCharacterByID = async (req, res) => {
 
 const getCharactersByUser = async (req, res) => {
     const query = { owner: req.session.account._id };
-    getCharacters(req, res, query);
+
+    try {
+        const docs = await Character.find(query).select('name characterID').lean().exec();
+        console.log(docs);
+        return res.json({ characters: docs });
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'Error retrieving characters!' });
+    }
+    //getCharacters(req, res, query);
 }
 
 const getCharactersByCampaign = async (req, res) => {
+    if(!req.query.campaignID) {
+        return res.status(400).json({ error: 'Campaign ID is required!' });
+    }
+
     const query = { campaignID: req.body.campaignID };
     getCharacters(req, res, query);
 }
@@ -128,7 +143,7 @@ const getCharactersByCampaign = async (req, res) => {
 const getCharacters = async (req, res, query) => {
     try {
         const docs = await Character.find(query).select('name characterID').lean().exec();
-
+        //console.log(docs);
         return res.json({ characters: docs });
     } catch (err) {
         console.log(err);
