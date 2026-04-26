@@ -5,7 +5,6 @@ const setName = (name) => _.escape(name).trim();
 
 const characterSchema = new mongoose.Schema({
     // character info
-    // just need name for the sake of searching and what not
     name: {
         type: String,
         required: true,
@@ -26,8 +25,8 @@ const characterSchema = new mongoose.Schema({
     },
     // maybe add a field to track uses?
     hitpoints: {
-        type: Number,
-        default: 0,
+        type: String,
+        default: "0/0",
     },
 
     // stat modifiers

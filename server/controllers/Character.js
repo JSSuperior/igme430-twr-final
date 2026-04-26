@@ -5,6 +5,10 @@ const characterPage = async (req, res) => {
     return res.render('app');
 }
 
+// const characterEditPage = async (req, res) => {
+//     return res.render('edit');
+// }
+
 // creates initial character entry
 const createCharacter = async (req, res) => {
     // do checks for premium here
@@ -43,7 +47,8 @@ const createCharacter = async (req, res) => {
 }
 
 const editCharacter = async (req, res) => {
-    if (!req.body.characterID) {
+    if (!req.body.characterID || !req.body.name || !req.body.description 
+        || !req.body.class || !req.body.powers || !req.body.hitpoints || !req.body.campaignID) {
         return res.status(400).json({ error: 'Character ID not found!' });
     }
 
@@ -57,21 +62,23 @@ const editCharacter = async (req, res) => {
                     class: req.body.class,
                     powers: req.body.powers,
                     hitpoints: req.body.hitpoints,
-                    strength: req.body.strength,
-                    agility: req.body.agility,
-                    presence: req.body.presence,
-                    toughness: req.body.toughness,
-                    omens: req.body.omens,
-                    weapon1: req.body.weapon1,
-                    weapon2: req.body.weapon2,
-                    armorName: req.body.armorName,
-                    armorRating: req.body.armorRating,
-                    equipment: req.body.equipment,
-                    silver: req.body.silver,
                     campaignID: req.body.campaignID
                  },
             }
         );
+
+        // strength: req.body.strength,
+        //             agility: req.body.agility,
+        //             presence: req.body.presence,
+        //             toughness: req.body.toughness,
+        //             omens: req.body.omens,
+        //             weapon1: req.body.weapon1,
+        //             weapon2: req.body.weapon2,
+        //             armorName: req.body.armorName,
+        //             armorRating: req.body.armorRating,
+        //             equipment: req.body.equipment,
+        //             silver: req.body.silver,
+
         //return res.json({ redirect: '/maker' });
         //return res.status(200).json({ message: 'Character updated!' });
         return res.status(200).json(character);
@@ -106,9 +113,11 @@ const getCharacterByID = async (req, res) => {
         return res.status(400).json({ error: 'Character ID is required!' });
     }
 
+    console.log(req.query.characterID);
+
     try {
         // can probably change from doc to something else later
-        const docs = await Character.findOne(req.query.characterID).lean().exec();
+        const docs = await Character.findOne({ characterID: req.query.characterID }).lean().exec();
 
         return res.json({ character: docs });
     } catch (err) {
@@ -120,15 +129,15 @@ const getCharacterByID = async (req, res) => {
 const getCharactersByUser = async (req, res) => {
     const query = { owner: req.session.account._id };
 
-    try {
-        const docs = await Character.find(query).select('name characterID').lean().exec();
-        console.log(docs);
-        return res.json({ characters: docs });
-    } catch (err) {
-        console.log(err);
-        return res.status(500).json({ error: 'Error retrieving characters!' });
-    }
-    //getCharacters(req, res, query);
+    // try {
+    //     const docs = await Character.find(query).select('name characterID').lean().exec();
+    //     console.log(docs);
+    //     return res.json({ characters: docs });
+    // } catch (err) {
+    //     console.log(err);
+    //     return res.status(500).json({ error: 'Error retrieving characters!' });
+    // }
+    getCharacters(req, res, query);
 }
 
 const getCharactersByCampaign = async (req, res) => {
@@ -136,7 +145,7 @@ const getCharactersByCampaign = async (req, res) => {
         return res.status(400).json({ error: 'Campaign ID is required!' });
     }
 
-    const query = { campaignID: req.body.campaignID };
+    const query = { campaignID: req.query.campaignID };
     getCharacters(req, res, query);
 }
 
