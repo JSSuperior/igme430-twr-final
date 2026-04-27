@@ -1,9 +1,9 @@
 const helper = require('./helper.js');
 const React = require('react');
-const { useState, useEffect} = React;
+const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
 
-// Character create form
+// Helper Post Functions
 const handleCreate = (e, onCharacterCreated) => {
     e.preventDefault();
     helper.hideError();
@@ -21,6 +21,80 @@ const handleCreate = (e, onCharacterCreated) => {
     return false;
 }
 
+const handleChangePass = (e) => {
+    e.preventDefault();
+    helper.hideError();
+
+    const passOld = e.target.querySelector('#passOld').value;
+    const pass = e.target.querySelector('#pass').value;
+    const pass2 = e.target.querySelector('#pass2').value;
+
+    if (!pass || !pass2 || !passOld) {
+        helper.handleError('All fields are required!');
+        return false;
+    }
+
+    if (pass != pass2) {
+        helper.handleError('Passwords do not match!');
+        return false;
+    }
+
+    if(passOld == pass) {
+        helper.handleError('Old password and new password cannot be the same!');
+        return dalse
+    }
+
+    helper.sendPost(e.target.action, { pass, pass2, passOld });
+
+    return false;
+}
+
+// edit character info
+const handleEdit = (e, characterID, onCharacterEdited) => {
+    e.preventDefault();
+    helper.hideError();
+
+    const campaignID = e.target.querySelector('#campaignID').value;
+    const name = e.target.querySelector('#characterName').value;
+    const description = e.target.querySelector('#characterDescription').value;
+    const characterClass = e.target.querySelector('#characterClass').value;
+    const powers = e.target.querySelector('#characterPowers').value;
+    const hitpoints = e.target.querySelector('#characterHitpoints').value;
+
+    // if (!campaignID || !name || !description || !characterClass || !powers || !hitpoints) {
+    //     helper.handleError('Field required!');
+    //     return false;
+    // }
+
+    helper.sendPost(e.target.action, { characterID, campaignID, name, description, characterClass, powers, hitpoints }, onCharacterEdited);
+    return false;
+}
+
+// Character Delete form
+const handleDelete = (e, onCharacterDeleted) => {
+    e.preventDefault();
+    helper.hideError();
+
+    const characterID = e.target.querySelector('#characterID').value;
+
+    if (!characterID) {
+        helper.handleError('Field required!');
+        return false;
+    }
+
+    helper.sendPost(e.target.action, { characterID }, onCharacterDeleted);
+    return false;
+}
+ 
+const handleRemove = (e, characterID, onCharacterRemoved) => {
+    e.preventDefault();
+    helper.hideError();
+
+    helper.sendPost(e.target.action, {characterID}, onCharacterDeleted);
+    return false;
+}
+
+// React Components
 const CreateCharacter = (props) => {
     return (
         <form id="createForm"
@@ -38,22 +112,6 @@ const CreateCharacter = (props) => {
             <input id="createCharacterSubmit" type="submit" value="Create Character" />
         </form>
     );
-}
-
-// Character Delete form
-const handleDelete = (e, onCharacterDeleted) => {
-    e.preventDefault();
-    helper.hideError();
-
-    const characterID = e.target.querySelector('#characterID').value;
-
-    if (!characterID) {
-        helper.handleError('Field required!');
-        return false;
-    }
-
-    helper.sendPost(e.target.action, { characterID }, onCharacterDeleted);
-    return false;
 }
 
 const CharacterDelete = (props) => {
@@ -102,7 +160,8 @@ const UserCharacterList = (props) => {
 
     const characterNodes = characters.map(character => {
         const passUpData = () => {
-            props.clickAction(character.characterID);
+            props.onClick(character.characterID);
+            helper.hideError();
         }
 
         return (
@@ -121,28 +180,7 @@ const UserCharacterList = (props) => {
     );
 };
 
-// edit character info
-const handleEdit = (e, characterID, onCharacterEdited) => {
-    e.preventDefault();
-    helper.hideError();
-
-    const campaignID = e.target.querySelector('#campaignID').value;
-    const name = e.target.querySelector('#characterName').value;
-    const description = e.target.querySelector('#characterDescription').value;
-    const characterClass = e.target.querySelector('#characterClass').value;
-    const powers = e.target.querySelector('#characterPowers').value;
-    const hitpoints = e.target.querySelector('#characterHitpoints').value;
-
-    if (!campaignID || !name || !description || !characterClass || !powers || !hitpoints) {
-        helper.handleError('Field required!');
-        return false;
-    }
-
-    helper.sendPost(e.target.action, { characterID, campaignID, name, description, characterClass, powers, hitpoints }, onCharacterEdited);
-    return false;
-}
-
-const EditCharacter = (props) => {
+const EditCharacterWindow = (props) => {
     const [characterID, setCharacterID] = useState(props.characterID);
     const [character, setCharacter] = useState({});
 
@@ -157,7 +195,8 @@ const EditCharacter = (props) => {
 
     // used code from this article for prepopulating text fields:
     // https://medium.com/@vanthedev/how-to-pre-populate-inputs-when-editing-forms-in-react-2530d6069ab3
-    const handleChange = (event) => {
+    const handleChangePass
+ = (event) => {
         const { target } = event;
         setCharacter((prevState) => ({
             ...prevState,
@@ -165,12 +204,18 @@ const EditCharacter = (props) => {
         }));
     };
 
+    const passUpData = () => {
+        props.onClick(0);
+        setCharacter(0);
+        helper.hideError();
+    }
+
     // If character not retrieved, return blank
     if (!character) {
         return (
             <div className="editCharacter">
                 <h3>Character edit view</h3>
-                <button onClick={props.onClick}> Return to Main View </button>
+                <button onClick={passUpData}> Return to Main View </button>
                 <p>Loading</p>
             </div>
         );
@@ -183,7 +228,7 @@ const EditCharacter = (props) => {
     return (
         <div className="editCharacter">
             <h3>Character edit view</h3>
-            <button onClick={props.onClick}> Return to Main View </button>
+            <button onClick={passUpData}> Return to Main View </button>
 
             <form id="editForm"
                 onSubmit={(e) => handleEdit(e, characterID, props.triggerReload)}
@@ -193,30 +238,42 @@ const EditCharacter = (props) => {
                 className="editForm"
             >
                 <label htmlFor="cid">Campaign ID: </label>
-                <input id="campaignID" type="text" name="campaignID" placeholder="Campaign ID"  value={character.campaignID} onChange={handleChange} />
+                <input id="campaignID" type="text" name="campaignID" placeholder="Campaign ID" value={character.campaignID} onChange={handleChangePass
+                
+                } />
 
                 <label htmlFor="name">Name: </label>
-                <input id="characterName" type="text" name="name" placeholder="Character Name" value={character.name} onChange={handleChange} />
+                <input id="characterName" type="text" name="name" placeholder="Character Name" value={character.name} onChange={handleChangePass
+                
+                } />
 
                 <label htmlFor="description">Description: </label>
-                <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} onChange={handleChange} />
+                <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} onChange={handleChangePass
+                
+                } />
 
                 <label htmlFor="class">Class: </label>
-                <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} onChange={handleChange} />
+                <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} onChange={handleChangePass
+                
+                } />
 
                 <label htmlFor="powers">Powers: </label>
-                <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} onChange={handleChange} />
+                <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} onChange={handleChangePass
+                
+                } />
 
                 <label htmlFor="hitpoints">Hit Points: </label>
-                <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" value={character.hitpoints} onChange={handleChange} />
+                <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" value={character.hitpoints} onChange={handleChangePass
+                
+                } />
 
                 <input id="editCharacterSubmit" type="submit" value="Save Changes" />
             </form>
-        </div> 
+        </div>
     );
 };
 
-const App = () => {
+const CharacterWindow = () => {
     const [currentCharacterID, setCurrentCharacterID] = useState(0);
     const [reloadCharacters, setReloadCharacters] = useState(false);
 
@@ -226,17 +283,12 @@ const App = () => {
         //setReloadCharacters(!reloadCharacters)
     }
 
-    const clearCharacter = () => {
-        setCurrentCharacterID(0);
-        //setReloadCharacters(!reloadCharacters)
-    }
-
     // edit character if character exists
     if (currentCharacterID != 0) {
         return (
             <div>
                 <div id="edit">
-                    <EditCharacter reloadCharacters={reloadCharacters} characterID={currentCharacterID} onClick={clearCharacter} />
+                    <EditCharacterWindow characterID={currentCharacterID} onClick={setCharacter} />
                 </div>
             </div>
         );
@@ -252,21 +304,102 @@ const App = () => {
                 <CharacterDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
             <div id="characters">
-                <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} clickAction={setCharacter} />
+                <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} onClick={setCharacter} />
             </div>
         </div>
     );
+};
 
-    /*
-            <div id="campaignCharacters">
-                <CampaignCharacterList characters={[]} />
+const CampaignCharacterWindow = (props) => {
+    const [campaignID, setCampaignID] = useState("");
+    const [characters, setCharacters] = useState(props.characters);
+
+    // pings server every time campaignID text field is updated
+    useEffect(() => {
+        const loadCharactersFromServer = async () => {
+            if (campaignID) {
+                const response = await fetch(`/getByCampaign?campaignID=${campaignID}`);
+                const data = await response.json();
+                setCharacters(data.characters);
+            }
+        };
+
+        loadCharactersFromServer();
+    }, [campaignID, props.reloadCharacters]);
+
+    if (characters.length === 0) {
+        return (
+            <div className="characterList">
+                <label htmlFor="cid">Campaign ID: </label>
+                <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" onChange={(e) => setCampaignID(e.target.value)} />
+                <h3 className="emptyCharacter">No Characters In Campaign Yet!</h3>
             </div>
-    */
+        );
+    }
+
+    const characterNodes = characters.map(character => {
+        return (
+            <div key={character.id} className="characterList">
+                <h3 className="characterName">Name: {character.name}</h3>
+                <h3 className="characterID">ID: {character.characterID}</h3>
+                <button onClick={(e) => handleRemove(e, character.characterID, props.triggerReload)}>Remove</button>
+            </div>
+        );
+        //
+    });
+
+    return (
+        <div className="characterList">
+            <label htmlFor="cid">Campaign ID: </label>
+            <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" onChange={(e) => setCampaignID(e.target.value)} />
+            <button onClick={props.triggerReload}>Refresh</button>
+            {characterNodes}
+        </div>
+    );
+};
+
+const ChangePasswordWindow = () => {
+    return (
+        <form id="changePasswordForm"
+            name="changePasswordForm"
+            onSubmit={handleChangePass}
+            action="/changePass"
+            method="POST"
+            className="mainForm"
+        >
+            <label htmlFor="passOld">Old Password: </label>
+            <input id="passOld" type="password" name="passOld" placeholder="old password" />
+            <label htmlFor="pass">New Password: </label>
+            <input id="pass" type="password" name="pass" placeholder="new password" />
+            <label htmlFor="pass2">New Password: </label>
+            <input id="pass2" type="password" name="pass2" placeholder="retype new password" />
+            <input className="formSubmit" type="submit" value="Sign in" />
+        </form>
+    );
 };
 
 const init = () => {
     const root = createRoot(document.getElementById('app'));
-    root.render(<App />);
+
+    const changePasswordButton = document.getElementById('changePasswordButton');
+    const characterButton = document.getElementById('characterButton');
+    const dmViewButton = document.getElementById('');
+
+    changePasswordButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        helper.hideError();
+        root.render(<ChangePasswordWindow />);
+        return false;
+    });
+
+    characterButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        helper.hideError();
+        root.render(<CharacterWindow />);
+        return false;
+    });
+
+    root.render(<CharacterWindow />);
 };
 
 window.onload = init;

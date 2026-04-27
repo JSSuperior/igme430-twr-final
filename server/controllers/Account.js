@@ -5,6 +5,10 @@ const loginPage = (req, res) => {
     return res.render('login');
 };
 
+// const changePasswordPage = (req, res) => {
+//     return res.render('login');
+// };
+
 const logout = (req, res) => {
     req.session.destroy();
     return res.redirect('/');
@@ -24,6 +28,7 @@ const login = (req, res) => {
         }
 
         req.session.account = Account.toAPI(account);
+        console.log(account);
 
         return res.json({ redirect: '/maker' });
     });
@@ -58,29 +63,49 @@ const signup = async (req, res) => {
 };
 
 const changePassword = async (req, res) => {
-    const username = `${req.body.username}`
+    //const username = `${req.body.username}`
+    const passOld = `${req.body.passOld}`;
     const pass = `${req.body.pass}`;
     const pass2 = `${req.body.pass2}`;
 
-    if (!username || !pass || !pass2) {
+    // check for all fields
+    if (!pass || !pass2 || !passOld) {
         return res.status(400).json({ error: 'All fields are required!' });
     }
 
+    // make sure new passwords are the same
     if (pass !== pass2) {
         return res.status(400).json({ error: 'Passwords do not match!' });
     }
 
-    try {
+    // make sure new passwords is different
+    if (passOld === pass) {
+        return res.status(400).json({ error: 'Old password and new password cannot be the same' });
+    }
 
+    try {
+        const hash = await Account.generateHash(pass);
+        const currentAccount = await Account.findOneAndUpdate(
+            { _id: req.session.account._id },
+            {
+                $set: {
+                    password: hash,
+                }
+            }
+        );
+
+        //console.log(currentAccount);
+        return res.json({ redirect: '/maker' });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'An error occured updating password!' });
     }
-}
+};
 
 module.exports = {
     loginPage,
     login,
     logout,
     signup,
+    changePassword,
 };
