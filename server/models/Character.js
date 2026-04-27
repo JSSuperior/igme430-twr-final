@@ -31,32 +31,24 @@ const characterSchema = new mongoose.Schema({
 
     // stat modifiers
     strength: {
-        type: Number,
-        min: -3,
-        max: 3,
-        default: 0
+        type: String,
+        default: "0"
     },
     agility: {
-        type: Number,
-        min: -3,
-        max: 3,
-        default: 0
+        type: String,
+        default: "0"
     },
     presence: {
-        type: Number,
-        min: -3,
-        max: 3,
-        default: 0
+        type: String,
+        default: "0"
     },
     toughness: {
-        type: Number,
-        min: -3,
-        max: 3,
-        default: 0
+        type: String,
+        default: "0"
     },
     omens: {
-        type: Number,
-        default: 0,
+        type: String,
+        default: "0"
     },
 
     // equiptment
@@ -68,23 +60,17 @@ const characterSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
-    armorName: {
+    armor: {
         type: String,
-        default: "",
-    },
-    armorRating: {
-        type: Number,
-        min: 0,
-        max: 3,
-        default: 0,
+        default: "0"
     },
     equipment: {
         type: String,
         default: "",
     },
     silver: {
-        type: Number,
-        default: 0,
+        type: String,
+        default: "0"
     },
 
     // admin

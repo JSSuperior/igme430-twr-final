@@ -62,25 +62,23 @@ const editCharacter = async (req, res) => {
                 $set: {
                     name: req.body.name,
                     description: req.body.description,
-                    class: req.body.class,
+                    class: req.body.characterClass,
                     powers: req.body.powers,
                     hitpoints: req.body.hitpoints,
                     campaignID: req.body.campaignID,
+                    strength: req.body.strength,
+                    agility: req.body.agility,
+                    presence: req.body.presence,
+                    toughness: req.body.toughness,
+                    omens: req.body.omens,
+                    weapon1: req.body.weapon1,
+                    weapon2: req.body.weapon2,
+                    armor: req.body.armor,
+                    equipment: req.body.equipment,
+                    silver: req.body.silver,
                 },
             }
-        );
-
-        // strength: req.body.strength,
-        //             agility: req.body.agility,
-        //             presence: req.body.presence,
-        //             toughness: req.body.toughness,
-        //             omens: req.body.omens,
-        //             weapon1: req.body.weapon1,
-        //             weapon2: req.body.weapon2,
-        //             armorName: req.body.armorName,
-        //             armorRating: req.body.armorRating,
-        //             equipment: req.body.equipment,
-        //             silver: req.body.silver,
+        );           
 
         //return res.json({ redirect: '/maker' });
         //return res.status(200).json({ message: 'Character updated!' });
@@ -98,8 +96,9 @@ const removeCharacterFromCampaign = async (req, res) => {
         return res.status(400).json({ error: 'CharacterID is required!' });
     }
 
+    // const character = 
     try {
-        const character = await Character.findOneAndUpdate(
+        await Character.findOneAndUpdate(
             { characterID: req.body.characterID },
             {
                 $set: {
@@ -107,7 +106,7 @@ const removeCharacterFromCampaign = async (req, res) => {
                 }
             }
         );
-        return res.status(200).json({message: 'Character successfully removed!'});
+        return res.status(200).json({message: 'Character successfully removed from campaign!'});
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'An error occured removing character from campaign!' });
