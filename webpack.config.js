@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-    entry: { app: './client/maker.jsx', login: './client/login.jsx', dmview: './client/dmview.jsx' },
+    entry: { app: './client/maker.jsx', login: './client/login.jsx'},
     module: {
         rules: [
             {

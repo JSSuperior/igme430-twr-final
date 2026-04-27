@@ -17,6 +17,14 @@ const createCharacter = async (req, res) => {
         return res.status(400).json({ error: 'Name is required!' });
     }
 
+    // if not premium and have 5 characters or more, then can't make any new ones
+    if(req.body.premium == false) {
+        const characters = await Character.find({ owner: req.session.account._id }).lean().exec();
+        if(characters.length >= 5) {
+            return res.status(500).json({ error: 'Non premium users cannot make more than 5 characters!'})
+        }
+    }
+
     // find a way to randomly generate unique character ID here
     // help from this stack overflow article
     // https://stackoverflow.com/questions/37174096/generate-unique-ids-js
@@ -51,9 +59,13 @@ const editCharacter = async (req, res) => {
     console.log(req.body.characterID);
 
     if (!req.body.characterID || !req.body.name || !req.body.description
-        || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID) {
-        return res.status(400).json({ error: 'Character ID not found!' });
+        || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID || !strength || !agility
+        || !presence || !toughness || !omens || !weapon1 || !weapon2 || !armor || !equipment || !silver) {
+        return res.status(400).json({ error: 'Missing Fields' });
     }
+
+    // do i want to put this here or somewhere else in the code?
+    if(req.body.premium == false)
 
     try {
         const character = await Character.findOneAndUpdate(

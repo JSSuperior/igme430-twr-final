@@ -9,6 +9,7 @@ const handleCreate = (e, onCharacterCreated) => {
     helper.hideError();
 
     const name = e.target.querySelector('#characterName').value;
+    //const premium = document.querySelector("#premiumCB").value;
 
     if (!name) {
         helper.handleError('Field required!');
@@ -60,17 +61,14 @@ const handleEdit = (e, characterID, onCharacterEdited) => {
     const characterClass = e.target.querySelector('#characterClass').value;
     const powers = e.target.querySelector('#characterPowers').value;
     const hitpoints = e.target.querySelector('#characterHitpoints').value;
-
     const strength = e.target.querySelector('#characterStrength').value;
     const agility = e.target.querySelector('#characterAgility').value;
     const presence = e.target.querySelector('#characterPresence').value;
     const toughness = e.target.querySelector('#characterToughness').value;
-
     const omens = e.target.querySelector('#characterOmens').value;
     const weapon1 = e.target.querySelector('#characterWeapon1').value;
     const weapon2 = e.target.querySelector('#characterWeapon2').value;
     const armor = e.target.querySelector('#characterArmor').value;
-
     const equipment = e.target.querySelector('#characterEquipment').value;
     const silver = e.target.querySelector('#characterSilver').value;
 
@@ -86,7 +84,17 @@ const handleEdit = (e, characterID, onCharacterEdited) => {
         description,
         characterClass,
         powers,
-        hitpoints
+        hitpoints,
+        strength,
+        agility,
+        presence,
+        toughness,
+        omens,
+        weapon1,
+        weapon2,
+        armor,
+        equipment,
+        silver,
     }
 
     helper.sendPost(e.target.action, body, onCharacterEdited);
@@ -229,7 +237,7 @@ const EditCharacterWindow = (props) => {
 
     const passUpData = () => {
         props.onClick(0);
-        setCharacter(0);
+        setCharacter({});
         helper.hideError();
     }
 
@@ -383,7 +391,31 @@ const CampaignCharacterWindow = (props) => {
             <div key={character.id} className="characterList">
                 <h3 className="characterName">Name: {character.name}</h3>
                 <h3 className="characterID">ID: {character.characterID}</h3>
+
+                <div className='info'>
+                    <p className="viewDescription">Description: {character.description}</p>
+                    <p className="viewClass">Class: {character.class}</p>
+                    <p className="viewPowers">Powers: {character.powers}</p>
+                </div>
+
+                <div className="stats">
+                    <p className="viewHitpoints">Hitpoints: {character.hitpoints}</p>
+                    <p className="viewStrength">Strength: {character.strength}</p>
+                    <p className="viewAgility">Agility: {character.agility}</p>
+                    <p className="viewPresence">Presence: {character.presence}</p>
+                    <p className="viewToughness">Toughness: {character.toughness}</p>
+                    <p className="viewOmens">Omens: {character.omens}</p>
+                </div>
+
+                <div className="inventory">
+                    <p className="viewOmens">Omens: {character.omens}</p>
+                    <p className="viewOmens">Omens: {character.omens}</p>
+                    <p className="viewOmens">Omens: {character.omens}</p>
+                    <p className="viewOmens">Omens: {character.omens}</p>
+                </div>
+                
                 <button onClick={(e) => handleRemove(e, character.characterID, props.triggerReload)}>Remove</button>
+                <hr />
             </div>
         );
         //
@@ -424,7 +456,7 @@ const init = () => {
 
     const changePasswordButton = document.getElementById('changePasswordButton');
     const characterButton = document.getElementById('characterButton');
-    const dmViewButton = document.getElementById('');
+    const dmViewButton = document.getElementById('dmViewButton');
 
     changePasswordButton.addEventListener('click', (e) => {
         e.preventDefault();
@@ -437,6 +469,14 @@ const init = () => {
         e.preventDefault();
         helper.hideError();
         root.render(<CharacterWindow />);
+        return false;
+    });
+
+    dmViewButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        helper.hideError();
+        // render the window here
+        root.render(<CampaignCharacterWindow />);
         return false;
     });
 

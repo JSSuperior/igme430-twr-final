@@ -15,7 +15,7 @@ const router = (app) => {
     app.get('/logout', mid.requiresLogin, controllers.Account.logout);
 
     // app handlebar views
-    app.get('/dmview', mid.requiresLogin, controllers.Character.dmPage)
+    //app.get('/dmview', mid.requiresLogin, controllers.Character.dmPage)
     app.get('/maker', mid.requiresLogin, controllers.Character.characterPage);
 
     // change password
