@@ -5,9 +5,9 @@ const characterPage = async (req, res) => {
     return res.render('app');
 }
 
-// const characterEditPage = async (req, res) => {
-//     return res.render('edit');
-// }
+const dmPage = async (req, res) => {
+    return res.render('dmview');
+}
 
 // creates initial character entry
 const createCharacter = async (req, res) => {
@@ -46,9 +46,12 @@ const createCharacter = async (req, res) => {
     }
 }
 
+// 
 const editCharacter = async (req, res) => {
-    if (!req.body.characterID || !req.body.name || !req.body.description 
-        || !req.body.class || !req.body.powers || !req.body.hitpoints || !req.body.campaignID) {
+    console.log(req.body.characterID);
+
+    if (!req.body.characterID || !req.body.name || !req.body.description
+        || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID) {
         return res.status(400).json({ error: 'Character ID not found!' });
     }
 
@@ -56,14 +59,14 @@ const editCharacter = async (req, res) => {
         const character = await Character.findOneAndUpdate(
             { characterID: req.body.characterID },
             {
-                $set: { 
+                $set: {
                     name: req.body.name,
                     description: req.body.description,
                     class: req.body.class,
                     powers: req.body.powers,
                     hitpoints: req.body.hitpoints,
-                    campaignID: req.body.campaignID
-                 },
+                    campaignID: req.body.campaignID,
+                },
             }
         );
 
@@ -81,6 +84,7 @@ const editCharacter = async (req, res) => {
 
         //return res.json({ redirect: '/maker' });
         //return res.status(200).json({ message: 'Character updated!' });
+        console.log(character);
         return res.status(200).json(character);
     } catch (err) {
         console.log(err);
@@ -88,6 +92,29 @@ const editCharacter = async (req, res) => {
     }
 }
 
+// Removes character with ID from a campaign
+const removeCharacterFromCampaign = async (req, res) => {
+    if (!req.body.characterID) {
+        return res.status(400).json({ error: 'CharacterID is required!' });
+    }
+
+    try {
+        const character = await Character.findOneAndUpdate(
+            { characterID: req.body.characterID },
+            {
+                $set: {
+                    campaignID: "",
+                }
+            }
+        );
+        return res.status(200).json({message: 'Character successfully removed!'});
+    } catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: 'An error occured removing character from campaign!' });
+    }
+}
+
+// Deletes character with specific ID from database
 const deleteCharacter = async (req, res) => {
     if (!req.body.characterID) {
         return res.status(400).json({ error: 'CharacterID is required!' });
@@ -106,7 +133,7 @@ const deleteCharacter = async (req, res) => {
     }
 }
 
-// will change to get by id later
+// returns JSON obj of character with specific ID
 const getCharacterByID = async (req, res) => {
     // change this to be a query param
     if (!req.query.characterID) {
@@ -126,22 +153,14 @@ const getCharacterByID = async (req, res) => {
     }
 }
 
+// Gets array of character JSON objs by owner ID
 const getCharactersByUser = async (req, res) => {
     const query = { owner: req.session.account._id };
-
-    // try {
-    //     const docs = await Character.find(query).select('name characterID').lean().exec();
-    //     console.log(docs);
-    //     return res.json({ characters: docs });
-    // } catch (err) {
-    //     console.log(err);
-    //     return res.status(500).json({ error: 'Error retrieving characters!' });
-    // }
     getCharacters(req, res, query);
 }
 
 const getCharactersByCampaign = async (req, res) => {
-    if(!req.query.campaignID) {
+    if (!req.query.campaignID) {
         return res.status(400).json({ error: 'Campaign ID is required!' });
     }
 
@@ -149,9 +168,10 @@ const getCharactersByCampaign = async (req, res) => {
     getCharacters(req, res, query);
 }
 
+// Returns array of character objs based on query
 const getCharacters = async (req, res, query) => {
     try {
-        const docs = await Character.find(query).select('name characterID').lean().exec();
+        const docs = await Character.find(query).lean().exec();
         //console.log(docs);
         return res.json({ characters: docs });
     } catch (err) {
@@ -162,9 +182,11 @@ const getCharacters = async (req, res, query) => {
 
 module.exports = {
     characterPage,
+    dmPage,
     createCharacter,
     editCharacter,
     deleteCharacter,
+    removeCharacterFromCampaign,
     getCharacterByID,
     getCharactersByUser,
     getCharactersByCampaign,

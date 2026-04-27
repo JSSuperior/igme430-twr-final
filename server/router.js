@@ -12,11 +12,15 @@ const router = (app) => {
     app.post('/signup', mid.requiresSecure, mid.requiresLogout, controllers.Account.signup);
     app.get('/logout', mid.requiresLogin, controllers.Account.logout);
 
-    // character modification
+    // app handlebar views
+    app.get('/dmview', mid.requiresLogin, controllers.Character.dmPage)
     app.get('/maker', mid.requiresLogin, controllers.Character.characterPage);
+
+    // character modification
     app.post('/create', mid.requiresLogin, controllers.Character.createCharacter);
     app.post('/edit', mid.requiresLogin, controllers.Character.editCharacter);
     app.post('/delete', mid.requiresLogin, controllers.Character.deleteCharacter);
+    app.post('/removeFromCampaign', mid.requiresLogin, controllers.Character.removeCharacterFromCampaign);
 
     // character retrieval
     app.get('/getByID', mid.requiresLogin, controllers.Character.getCharacterByID);

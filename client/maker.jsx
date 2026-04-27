@@ -1,43 +1,7 @@
 const helper = require('./helper.js');
 const React = require('react');
-const { useState, useEffect } = React;
+const { useState, useEffect} = React;
 const { createRoot } = require('react-dom/client');
-
-// const handleEdit = (e, onCharacterEdited) => {
-
-// }
-
-// const editCharacterForm = (props) => {
-
-
-//     return (
-//         <form id="editForm"
-//             onSubmit={(e) => handleEdit(e, props.triggerReload)}
-//             name="characterEditForm"
-//             action="/edit"
-//             method="POST"
-//             className="editForm"
-//         >
-
-//             <label htmlFor="name">Name: </label>
-//             <input id="characterName" type="text" name="name" placeholder="Character Name" />
-
-//             <label htmlFor="description">Description: </label>
-//             <input id="characterDescription" type="text" name="description" placeholder="Character Description" />
-
-//             <label htmlFor="class">Class: </label>
-//             <input id="characterClass" type="text" name="class" placeholder="Character Class" />
-
-//             <label htmlFor="powers">Powers: </label>
-//             <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" />
-
-//             <label htmlFor="hitpoints">Hit Points: </label>
-//             <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" />
-
-//             <input id="editCharacterSubmit" type="submit" value="Save Changes" />
-//         </form>
-//     );
-// }
 
 // Character create form
 const handleCreate = (e, onCharacterCreated) => {
@@ -157,59 +121,8 @@ const UserCharacterList = (props) => {
     );
 };
 
-// contains a box for campaingn ID and when entered will refresh with all characters in campaign 
-const CampaignCharacterList = (props) => {
-    const [campaignID, setCampaignID] = useState("");
-    const [characters, setCharacters] = useState(props.characters);
-
-    useEffect(() => {
-        const loadCharactersFromServer = async () => {
-            const response = await fetch(`/getByCampaign?campaignID=${campaignID}`);
-            const data = await response.json();
-            setCharacters(data.characters);
-        };
-
-        if(campaignID) {
-            loadCharactersFromServer();
-        }
-    }, [campaignID]);
-
-    if (characters.length === 0) {
-        return (
-            <div className="characterList">
-                <label htmlFor="cid">Campaign ID: </label>
-                <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" onChange={(e) => setCampaignID(e.target.value)}/>
-                <h3 className="emptyCharacter">No Characters In Campaign Yet!</h3>
-            </div>
-        );
-    }
-
-    const characterNodes = characters.map(character => {
-        // const passUpData = () => {
-        //     props.clickAction(character.characterID);
-        // }
-        // later add some sort of view functionality
-
-        return (
-            <div key={character.id} className="characterList">
-                <h3 className="characterName">Name: {character.name}</h3>
-                <h3 className="characterID">ID: {character.characterID}</h3>
-            </div>
-        );
-        //<button onClick={passUpData}>Edit Character</button>
-    });
-
-    return (
-        <div className="characterList">
-            <label htmlFor="cid">Campaign ID: </label>
-            <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" onChange={(e) => setCampaignID(e.target.value)}/>
-            {characterNodes}
-        </div>
-    );
-};
-
 // edit character info
-const handleEdit = (e, onCharacterEdited) => {
+const handleEdit = (e, characterID, onCharacterEdited) => {
     e.preventDefault();
     helper.hideError();
 
@@ -220,12 +133,12 @@ const handleEdit = (e, onCharacterEdited) => {
     const powers = e.target.querySelector('#characterPowers').value;
     const hitpoints = e.target.querySelector('#characterHitpoints').value;
 
-    if (!campaignID || !name || ! description || !characterClass || !powers || !hitpoints) {
+    if (!campaignID || !name || !description || !characterClass || !powers || !hitpoints) {
         helper.handleError('Field required!');
         return false;
     }
 
-    helper.sendPost(e.target.action, { campaignID, name, description, characterClass, powers, hitpoints }, onCharacterEdited);
+    helper.sendPost(e.target.action, { characterID, campaignID, name, description, characterClass, powers, hitpoints }, onCharacterEdited);
     return false;
 }
 
@@ -242,13 +155,23 @@ const EditCharacter = (props) => {
         loadCharacterFromServer();
     }, [props.characterID]);
 
+    // used code from this article for prepopulating text fields:
+    // https://medium.com/@vanthedev/how-to-pre-populate-inputs-when-editing-forms-in-react-2530d6069ab3
+    const handleChange = (event) => {
+        const { target } = event;
+        setCharacter((prevState) => ({
+            ...prevState,
+            [target.name]: target.value,
+        }));
+    };
+
     // If character not retrieved, return blank
     if (!character) {
         return (
             <div className="editCharacter">
                 <h3>Character edit view</h3>
-                <p>Error retrieving character info</p>
                 <button onClick={props.onClick}> Return to Main View </button>
+                <p>Loading</p>
             </div>
         );
     }
@@ -263,33 +186,33 @@ const EditCharacter = (props) => {
             <button onClick={props.onClick}> Return to Main View </button>
 
             <form id="editForm"
-                onSubmit={(e) => handleEdit(e, props.triggerReload)}
+                onSubmit={(e) => handleEdit(e, characterID, props.triggerReload)}
                 name="characterEditForm"
                 action="/edit"
                 method="POST"
                 className="editForm"
             >
                 <label htmlFor="cid">Campaign ID: </label>
-                <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" value={character.campaignID} />
+                <input id="campaignID" type="text" name="campaignID" placeholder="Campaign ID"  value={character.campaignID} onChange={handleChange} />
 
                 <label htmlFor="name">Name: </label>
-                <input id="characterName" type="text" name="name" placeholder="Character Name" value={character.name} />
+                <input id="characterName" type="text" name="name" placeholder="Character Name" value={character.name} onChange={handleChange} />
 
                 <label htmlFor="description">Description: </label>
-                <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} />
+                <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} onChange={handleChange} />
 
                 <label htmlFor="class">Class: </label>
-                <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} />
+                <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} onChange={handleChange} />
 
                 <label htmlFor="powers">Powers: </label>
-                <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} />
+                <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} onChange={handleChange} />
 
                 <label htmlFor="hitpoints">Hit Points: </label>
-                <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" value={character.hitpoints} />
+                <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" value={character.hitpoints} onChange={handleChange} />
 
                 <input id="editCharacterSubmit" type="submit" value="Save Changes" />
             </form>
-        </div>
+        </div> 
     );
 };
 
@@ -331,35 +254,14 @@ const App = () => {
             <div id="characters">
                 <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} clickAction={setCharacter} />
             </div>
-            <div id="campaignCharacters">
-                <CampaignCharacterList characters={[]} />
-            </div>
         </div>
     );
 
-    // edit character if there is one
-    // if (currentCharacterID === 0) {
-
-    // } else {
-    //     return (
-    //         
-    //     );
-    // }
-
-
-    // return (
-    //     <div>
-    //         <div id="makeDomo">
-    //             <DomoForm triggerReload={() => setReloadCharacters(!reloadCharacters)} />
-    //         </div>
-    //         <div id="deleteForm">
-    //             <DomoDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
-    //         </div>
-    //         <div id="characters">
-    //             <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} />
-    //         </div>
-    //     </div>
-    // );
+    /*
+            <div id="campaignCharacters">
+                <CampaignCharacterList characters={[]} />
+            </div>
+    */
 };
 
 const init = () => {
