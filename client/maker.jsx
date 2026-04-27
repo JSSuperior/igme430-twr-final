@@ -211,7 +211,7 @@ const UserCharacterList = (props) => {
     );
 };
 
-const EditCharacterWindow = (props) => {
+const EditCharacter = (props) => {
     const [characterID, setCharacterID] = useState(props.characterID);
     const [character, setCharacter] = useState({});
 
@@ -274,47 +274,42 @@ const EditCharacterWindow = (props) => {
                 <label htmlFor="name">Name: </label>
                 <input id="characterName" type="text" name="name" placeholder="Character Name" value={character.name} onChange={handleChange} />
 
-                <label htmlFor="description">Description: </label>
-                <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} onChange={handleChange} />
+                <div className="editInfo">
+                    <label htmlFor="description">Description: </label>
+                    <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} onChange={handleChange} />
+                    <label htmlFor="class">Class: </label>
+                    <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} onChange={handleChange} />
+                    <label htmlFor="powers">Powers: </label>
+                    <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} onChange={handleChange} />
+                </div>
 
-                <label htmlFor="class">Class: </label>
-                <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} onChange={handleChange} />
+                <div className="editStats">
+                    <label htmlFor="hitpoints">Hit Points: </label>
+                    <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" value={character.hitpoints} onChange={handleChange} />
+                    <label htmlFor="strength">Strength Modifier: </label>
+                    <input id="characterStrength" type="text" name="strength" placeholder="Character Strength Modifier" value={character.strength} onChange={handleChange} />
+                    <label htmlFor="agility">Agility Modifier: </label>
+                    <input id="characterAgility" type="text" name="agility" placeholder="Character Agility Modifier" value={character.agillity} onChange={handleChange} />
+                    <label htmlFor="presence">Presence Modifier: </label>
+                    <input id="characterPresence" type="text" name="presence" placeholder="Character Presence" value={character.presence} onChange={handleChange} />
+                    <label htmlFor="toughness">Toughness Modifier: </label>
+                    <input id="characterToughness" type="text" name="toughness" placeholder="Character Toughness" value={character.toughness} onChange={handleChange} />
+                    <label htmlFor="omens">Omens: </label>
+                    <input id="characterOmens" type="text" name="omens" placeholder="Omens" value={character.omens} onChange={handleChange} />
+                </div>
 
-                <label htmlFor="powers">Powers: </label>
-                <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} onChange={handleChange} />
-
-                <label htmlFor="hitpoints">Hit Points: </label>
-                <input id="characterHitpoints" type="text" name="hitpoints" placeholder="Character Hitpoints" value={character.hitpoints} onChange={handleChange} />
-
-                <label htmlFor="strength">Strength Modifier: </label>
-                <input id="characterStrength" type="text" name="strength" placeholder="Character Strength Modifier" value={character.strength} onChange={handleChange} />
-
-                <label htmlFor="agility">Agility Modifier: </label>
-                <input id="characterAgility" type="text" name="agility" placeholder="Character Agility Modifier" value={character.agillity} onChange={handleChange} />
-
-                <label htmlFor="presence">Presence Modifier: </label>
-                <input id="characterPresence" type="text" name="presence" placeholder="Character Presence" value={character.presence} onChange={handleChange} />
-
-                <label htmlFor="toughness">Toughness Modifier: </label>
-                <input id="characterToughness" type="text" name="toughness" placeholder="Character Toughness" value={character.toughness} onChange={handleChange} />
-
-                <label htmlFor="omens">Omens: </label>
-                <input id="characterOmens" type="text" name="omens" placeholder="Omens" value={character.omens} onChange={handleChange} />
-
-                <label htmlFor="weapon1">First Weapon: </label>
-                <input id="characterWeapon1" type="text" name="weapon1" placeholder="First Weapon" value={character.weapon1} onChange={handleChange} />
-
-                <label htmlFor="weapon2">Second Weapon: </label>
-                <input id="characterWeapon2" type="text" name="weapon2" placeholder="Second Weapon" value={character.weapon2} onChange={handleChange} />
-
-                <label htmlFor="armor">Armor: </label>
-                <input id="characterArmor" type="text" name="armor" placeholder="Armor" value={character.armor} onChange={handleChange} />
-
-                <label htmlFor="equipment">Equipment: </label>
-                <input id="characterEquipment" type="text" name="equipment" placeholder="Equipment" value={character.equipment} onChange={handleChange} />
-
-                <label htmlFor="silver">Silver: </label>
-                <input id="characterSilver" type="text" name="silver" placeholder="Silver" value={character.silver} onChange={handleChange} />
+                <div className="editInventory">
+                    <label htmlFor="weapon1">First Weapon: </label>
+                    <input id="characterWeapon1" type="text" name="weapon1" placeholder="First Weapon" value={character.weapon1} onChange={handleChange} />
+                    <label htmlFor="weapon2">Second Weapon: </label>
+                    <input id="characterWeapon2" type="text" name="weapon2" placeholder="Second Weapon" value={character.weapon2} onChange={handleChange} />
+                    <label htmlFor="armor">Armor: </label>
+                    <input id="characterArmor" type="text" name="armor" placeholder="Armor" value={character.armor} onChange={handleChange} />
+                    <label htmlFor="equipment">Equipment: </label>
+                    <input id="characterEquipment" type="text" name="equipment" placeholder="Equipment" value={character.equipment} onChange={handleChange} />
+                    <label htmlFor="silver">Silver: </label>
+                    <input id="characterSilver" type="text" name="silver" placeholder="Silver" value={character.silver} onChange={handleChange} />
+                </div>
 
                 <input id="editCharacterSubmit" type="submit" value="Save Changes" />
             </form>
@@ -337,7 +332,7 @@ const CharacterWindow = () => {
         return (
             <div>
                 <div id="edit">
-                    <EditCharacterWindow characterID={currentCharacterID} onClick={setCharacter} />
+                    <EditCharacter characterID={currentCharacterID} onClick={setCharacter} />
                 </div>
             </div>
         );
@@ -392,13 +387,13 @@ const CampaignCharacterWindow = (props) => {
                 <h3 className="characterName">Name: {character.name}</h3>
                 <h3 className="characterID">ID: {character.characterID}</h3>
 
-                <div className='info'>
+                <div className='viewInfo'>
                     <p className="viewDescription">Description: {character.description}</p>
                     <p className="viewClass">Class: {character.class}</p>
                     <p className="viewPowers">Powers: {character.powers}</p>
                 </div>
 
-                <div className="stats">
+                <div className="viewStats">
                     <p className="viewHitpoints">Hitpoints: {character.hitpoints}</p>
                     <p className="viewStrength">Strength: {character.strength}</p>
                     <p className="viewAgility">Agility: {character.agility}</p>
@@ -407,13 +402,14 @@ const CampaignCharacterWindow = (props) => {
                     <p className="viewOmens">Omens: {character.omens}</p>
                 </div>
 
-                <div className="inventory">
-                    <p className="viewOmens">Omens: {character.omens}</p>
-                    <p className="viewOmens">Omens: {character.omens}</p>
-                    <p className="viewOmens">Omens: {character.omens}</p>
-                    <p className="viewOmens">Omens: {character.omens}</p>
+                <div className="viewInventory">
+                    <p className="viewWeapon1">First Weapon: {character.weapon1}</p>
+                    <p className="viewWeapon2">Second Weapon: {character.weapon2}</p>
+                    <p className="viewArmor">Armor: {character.armor}</p>
+                    <p className="viewEquipment">Equipment: {character.equipment}</p>
+                    <p className="viewSilver">Silver: {character.silver}</p>
                 </div>
-                
+
                 <button onClick={(e) => handleRemove(e, character.characterID, props.triggerReload)}>Remove</button>
                 <hr />
             </div>

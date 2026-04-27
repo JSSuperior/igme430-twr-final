@@ -18,10 +18,10 @@ const createCharacter = async (req, res) => {
     }
 
     // if not premium and have 5 characters or more, then can't make any new ones
-    if(req.body.premium == false) {
+    if (req.body.premium == false) {
         const characters = await Character.find({ owner: req.session.account._id }).lean().exec();
-        if(characters.length >= 5) {
-            return res.status(500).json({ error: 'Non premium users cannot make more than 5 characters!'})
+        if (characters.length >= 5) {
+            return res.status(500).json({ error: 'Non premium users cannot make more than 5 characters!' })
         }
     }
 
@@ -59,13 +59,12 @@ const editCharacter = async (req, res) => {
     console.log(req.body.characterID);
 
     if (!req.body.characterID || !req.body.name || !req.body.description
-        || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID || !strength || !agility
-        || !presence || !toughness || !omens || !weapon1 || !weapon2 || !armor || !equipment || !silver) {
+        || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID || !req.body.strength || !req.body.agility
+        || !req.body.presence || !req.body.toughness || !req.body.omens || !req.body.weapon1 || !req.body.weapon2 || !req.body.armor || !req.body.equipment || !req.body.silver) {
         return res.status(400).json({ error: 'Missing Fields' });
     }
 
     // do i want to put this here or somewhere else in the code?
-    if(req.body.premium == false)
 
     try {
         const character = await Character.findOneAndUpdate(
@@ -90,7 +89,7 @@ const editCharacter = async (req, res) => {
                     silver: req.body.silver,
                 },
             }
-        );           
+        );
 
         //return res.json({ redirect: '/maker' });
         //return res.status(200).json({ message: 'Character updated!' });
@@ -118,7 +117,7 @@ const removeCharacterFromCampaign = async (req, res) => {
                 }
             }
         );
-        return res.status(200).json({message: 'Character successfully removed from campaign!'});
+        return res.status(200).json({ message: 'Character successfully removed from campaign!' });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'An error occured removing character from campaign!' });
@@ -183,6 +182,7 @@ const getCharactersByCampaign = async (req, res) => {
 const getCharacters = async (req, res, query) => {
     try {
         const docs = await Character.find(query).lean().exec();
+
         //console.log(docs);
         return res.json({ characters: docs });
     } catch (err) {
