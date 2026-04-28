@@ -4,21 +4,20 @@ const { useState, useEffect } = React;
 const { createRoot } = require('react-dom/client');
 
 // Helper Post Functions
-const handleCreate = (e, onCharacterCreated) => {
+const handleCreate = (e, premium, onCharacterCreated) => {
     e.preventDefault();
     helper.hideError();
 
     const name = e.target.querySelector('#characterName').value;
-    //const premium = document.querySelector("#premiumCB").value;
 
     if (!name) {
-        helper.handleError('Field required!');
+        helper.handleError('Name required!');
         return false;
     }
 
     console.log(name);
 
-    helper.sendPost(e.target.action, { name }, onCharacterCreated);
+    helper.sendPost(e.target.action, { name, premium }, onCharacterCreated);
     return false;
 }
 
@@ -108,20 +107,20 @@ const handleDelete = (e, onCharacterDeleted) => {
 
     const characterID = e.target.querySelector('#characterID').value;
 
-    if (!characterID) {
-        helper.handleError('Field required!');
-        return false;
-    }
+    // if (!characterID) {
+    //     helper.handleError('Field required!');
+    //     return false;
+    // }
 
     helper.sendPost(e.target.action, { characterID }, onCharacterDeleted);
     return false;
 }
 
-const handleRemove = (e, characterID, onCharacterRemoved) => {
+const handleRemove = (e, action, characterID, onCharacterRemoved) => {
     e.preventDefault();
     helper.hideError();
 
-    helper.sendPost(e.target.action, { characterID }, onCharacterDeleted);
+    helper.sendPost(action, { characterID }, onCharacterRemoved);
     return false;
 }
 
@@ -129,18 +128,15 @@ const handleRemove = (e, characterID, onCharacterRemoved) => {
 const CreateCharacter = (props) => {
     return (
         <form id="createForm"
-            onSubmit={(e) => handleCreate(e, props.triggerReload)}
+            onSubmit={(e) => handleCreate(e, props.premiumEnabled, props.triggerReload)}
             name="characterCreateForm"
             action="/create"
             method="POST"
             className="createForm"
         >
-            <h1>
-                Character Creation Form
-            </h1>
-            <label htmlFor="name">Name: </label>
+            <label htmlFor="name">Create New Character: </label>
             <input id="characterName" type="text" name="name" placeholder="Character Name" />
-            <input id="createCharacterSubmit" type="submit" value="Create Character" />
+            <input id="createCharacterSubmit" type="submit" value="Create" />
         </form>
     );
 }
@@ -154,13 +150,10 @@ const CharacterDelete = (props) => {
             method="POST"
             className="deleteForm"
         >
-            <h1>
-                Character Deletion Form
-            </h1>
-            <label htmlFor="id">Character ID: </label>
+            <label htmlFor="id">Delete Character: </label>
             <input id="characterID" type="number" name="id" placeholder="Character ID Number" />
 
-            <input className="deleteCharacterSubmit" type="submit" value="Delete Character" />
+            <input className="deleteCharacterSubmit" type="submit" value="Delete (Permanently!)" />
         </form>
     );
 };
@@ -171,15 +164,17 @@ const UserCharacterList = (props) => {
     // https://medium.com/@ozhanli/passing-data-from-child-to-parent-components-in-react-e347ea60b1bb
 
     const [characters, setCharacters] = useState(props.characters);
+    let number = 0;
 
     useEffect(() => {
         const loadCharactersFromServer = async () => {
-            const response = await fetch('/getByUser');
+            number = 0;
+            const response = await fetch(`/getByUser`);
             const data = await response.json();
             setCharacters(data.characters);
         };
         loadCharactersFromServer();
-    }, [props.reloadCharacters]);
+    }, [props.reloadCharacters, props.premiumEnabled]);
 
     if (characters.length === 0) {
         return (
@@ -190,22 +185,25 @@ const UserCharacterList = (props) => {
     }
 
     const characterNodes = characters.map(character => {
+        number++;
+
         const passUpData = () => {
             props.onClick(character.characterID);
             helper.hideError();
         }
 
         return (
-            <div key={character.id} className="characterList">
+            <div key={number} className="characterList">
                 <h3 className="characterName">Name: {character.name}</h3>
                 <h3 className="characterID">ID: {character.characterID}</h3>
-                <button onClick={passUpData}>Edit Character</button>
+                {number < 6 || props.premiumEnabled == true ? (<button onClick={passUpData}>Edit Character</button>) : (<p>You need to be a premium member to edit this character!</p>)}
             </div>
         );
     });
 
     return (
         <div className="characterList">
+            <h3>My Characters: </h3>
             {characterNodes}
         </div>
     );
@@ -258,8 +256,8 @@ const EditCharacter = (props) => {
     // https://stackoverflow.com/questions/59668592/pre-populate-text-input-with-object-values-react 
     return (
         <div className="editCharacter">
-            <h3>Character edit view</h3>
             <button onClick={passUpData}> Return to Main View </button>
+            <h3>Edit Character:</h3>
 
             <form id="editForm"
                 onSubmit={(e) => handleEdit(e, characterID, props.triggerReload)}
@@ -279,8 +277,9 @@ const EditCharacter = (props) => {
                     <input id="characterDescription" type="text" name="description" placeholder="Character Description" value={character.description} onChange={handleChange} />
                     <label htmlFor="class">Class: </label>
                     <input id="characterClass" type="text" name="class" placeholder="Character Class" value={character.class} onChange={handleChange} />
-                    <label htmlFor="powers">Powers: </label>
+                    <label htmlFor="powers">Powers (Presence + d4 times per day): </label>
                     <input id="characterPowers" type="text" name="powers" placeholder="Character Powers" value={character.powers} onChange={handleChange} />
+                    <p>Presence DR12, or -d2 HP and no Powers for 1 hr.</p>
                 </div>
 
                 <div className="editStats">
@@ -289,13 +288,14 @@ const EditCharacter = (props) => {
                     <label htmlFor="strength">Strength Modifier: </label>
                     <input id="characterStrength" type="text" name="strength" placeholder="Character Strength Modifier" value={character.strength} onChange={handleChange} />
                     <label htmlFor="agility">Agility Modifier: </label>
-                    <input id="characterAgility" type="text" name="agility" placeholder="Character Agility Modifier" value={character.agillity} onChange={handleChange} />
+                    <input id="characterAgility" type="text" name="agility" placeholder="Character Agility Modifier" value={character.agility} onChange={handleChange} />
                     <label htmlFor="presence">Presence Modifier: </label>
                     <input id="characterPresence" type="text" name="presence" placeholder="Character Presence" value={character.presence} onChange={handleChange} />
                     <label htmlFor="toughness">Toughness Modifier: </label>
                     <input id="characterToughness" type="text" name="toughness" placeholder="Character Toughness" value={character.toughness} onChange={handleChange} />
                     <label htmlFor="omens">Omens: </label>
                     <input id="characterOmens" type="text" name="omens" placeholder="Omens" value={character.omens} onChange={handleChange} />
+                    <p>Maximum damage, Reroll, –d6 damage, DR –4, No Crit/Fumble</p>
                 </div>
 
                 <div className="editInventory">
@@ -305,7 +305,7 @@ const EditCharacter = (props) => {
                     <input id="characterWeapon2" type="text" name="weapon2" placeholder="Second Weapon" value={character.weapon2} onChange={handleChange} />
                     <label htmlFor="armor">Armor: </label>
                     <input id="characterArmor" type="text" name="armor" placeholder="Armor" value={character.armor} onChange={handleChange} />
-                    <label htmlFor="equipment">Equipment: </label>
+                    <label htmlFor="equipment">Equipment (Strength + 8 items or DR+2 on Agility/Strength tests): </label>
                     <input id="characterEquipment" type="text" name="equipment" placeholder="Equipment" value={character.equipment} onChange={handleChange} />
                     <label htmlFor="silver">Silver: </label>
                     <input id="characterSilver" type="text" name="silver" placeholder="Silver" value={character.silver} onChange={handleChange} />
@@ -320,17 +320,18 @@ const EditCharacter = (props) => {
 const CharacterWindow = () => {
     const [currentCharacterID, setCurrentCharacterID] = useState(0);
     const [reloadCharacters, setReloadCharacters] = useState(false);
+    const [premium, setPremium] = useState(false);
 
     // might be able to condense these
     const setCharacter = (value) => {
         setCurrentCharacterID(value);
-        //setReloadCharacters(!reloadCharacters)
     }
 
     // edit character if character exists
     if (currentCharacterID != 0) {
         return (
             <div>
+                {premium === false ? (<div className='advertisment'><p>Advertisment Here</p></div>) : (<div><p>Premium account!</p></div>)}
                 <div id="edit">
                     <EditCharacter characterID={currentCharacterID} onClick={setCharacter} />
                 </div>
@@ -341,14 +342,20 @@ const CharacterWindow = () => {
     // otherwise render page normally
     return (
         <div>
+            <div id="premiumToggle">
+                <button onClick={(e) => setPremium(!premium)}>Toggle Premium Subscription</button>
+            </div>
+            {premium === false ? (<div className='advertisment'><p>Advertisment Here</p></div>) : (<div><p>Premium account!</p></div>)}
+            <h1>Character Management Page</h1>
             <div id="makeCharacter">
-                <CreateCharacter triggerReload={() => setReloadCharacters(!reloadCharacters)} />
+                <CreateCharacter premiumEnabled={premium} triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
             <div id="deleteCharacter">
                 <CharacterDelete triggerReload={() => setReloadCharacters(!reloadCharacters)} />
             </div>
+            <hr />
             <div id="characters">
-                <UserCharacterList characters={[]} reloadCharacters={reloadCharacters} onClick={setCharacter} />
+                <UserCharacterList premiumEnabled={premium} characters={[]} reloadCharacters={reloadCharacters} onClick={setCharacter} />
             </div>
         </div>
     );
@@ -356,73 +363,78 @@ const CharacterWindow = () => {
 
 const CampaignCharacterWindow = (props) => {
     const [campaignID, setCampaignID] = useState("");
-    const [characters, setCharacters] = useState(props.characters);
+    const [characters, setCharacters] = useState([]);
+    const [reloadView, triggerReloadView] = useState(false);
+    const [premium, setPremium] = useState(false);
 
-    // pings server every time campaignID text field is updated
+    // update this later so that fields respond properly
+    // could probably move this to a seperate?
     useEffect(() => {
         const loadCharactersFromServer = async () => {
-            if (campaignID) {
-                const response = await fetch(`/getByCampaign?campaignID=${campaignID}`);
-                const data = await response.json();
-                setCharacters(data.characters);
-            }
+            helper.hideError();
+            // if (!characters) {
+                
+            // }
+            const response = await fetch(`/getByCampaign?campaignID=${campaignID}`);
+            const data = await response.json();
+            setCharacters(data.characters);
         };
 
         loadCharactersFromServer();
-    }, [campaignID, props.reloadCharacters]);
+    }, [reloadView]);
 
-    if (characters.length === 0) {
-        return (
-            <div className="characterList">
-                <label htmlFor="cid">Campaign ID: </label>
-                <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" onChange={(e) => setCampaignID(e.target.value)} />
-                <h3 className="emptyCharacter">No Characters In Campaign Yet!</h3>
-            </div>
-        );
+    let content;
+
+    if (characters) {
+        content = characters.map(character => {
+            return (
+                <div key={character.id} className="characterList">
+                    <h3 className="characterName">Name: {character.name}</h3>
+
+                    <div className='viewInfo'>
+                        <p className="viewDescription">Description: {character.description}</p>
+                        <p className="viewClass">Class: {character.class}</p>
+                        <p className="viewPowers">Powers: {character.powers}</p>
+                    </div>
+
+                    <div className="viewStats">
+                        <p className="viewHitpoints">Hitpoints: {character.hitpoints}</p>
+                        <p className="viewStrength">Strength: {character.strength}</p>
+                        <p className="viewAgility">Agility: {character.agility}</p>
+                        <p className="viewPresence">Presence: {character.presence}</p>
+                        <p className="viewToughness">Toughness: {character.toughness}</p>
+                        <p className="viewOmens">Omens: {character.omens}</p>
+                    </div>
+
+                    <div className="viewInventory">
+                        <p className="viewWeapon1">First Weapon: {character.weapon1}</p>
+                        <p className="viewWeapon2">Second Weapon: {character.weapon2}</p>
+                        <p className="viewArmor">Armor: {character.armor}</p>
+                        <p className="viewEquipment">Equipment: {character.equipment}</p>
+                        <p className="viewSilver">Silver: {character.silver}</p>
+                    </div>
+
+                    <button onClick={(e) => handleRemove(e, '/removeFromCampaign', character.characterID, onClick)}>Remove</button>
+                    <hr />
+                </div>
+            );
+        });
+    } else {
+        content = (<div></div>);
     }
-
-    const characterNodes = characters.map(character => {
-        return (
-            <div key={character.id} className="characterList">
-                <h3 className="characterName">Name: {character.name}</h3>
-                <h3 className="characterID">ID: {character.characterID}</h3>
-
-                <div className='viewInfo'>
-                    <p className="viewDescription">Description: {character.description}</p>
-                    <p className="viewClass">Class: {character.class}</p>
-                    <p className="viewPowers">Powers: {character.powers}</p>
-                </div>
-
-                <div className="viewStats">
-                    <p className="viewHitpoints">Hitpoints: {character.hitpoints}</p>
-                    <p className="viewStrength">Strength: {character.strength}</p>
-                    <p className="viewAgility">Agility: {character.agility}</p>
-                    <p className="viewPresence">Presence: {character.presence}</p>
-                    <p className="viewToughness">Toughness: {character.toughness}</p>
-                    <p className="viewOmens">Omens: {character.omens}</p>
-                </div>
-
-                <div className="viewInventory">
-                    <p className="viewWeapon1">First Weapon: {character.weapon1}</p>
-                    <p className="viewWeapon2">Second Weapon: {character.weapon2}</p>
-                    <p className="viewArmor">Armor: {character.armor}</p>
-                    <p className="viewEquipment">Equipment: {character.equipment}</p>
-                    <p className="viewSilver">Silver: {character.silver}</p>
-                </div>
-
-                <button onClick={(e) => handleRemove(e, character.characterID, props.triggerReload)}>Remove</button>
-                <hr />
-            </div>
-        );
-        //
-    });
 
     return (
         <div className="characterList">
+            <div id="premiumToggle">
+                <button onClick={(e) => setPremium(!premium)}>Toggle Premium Subscription</button>
+            </div>
+            {premium === false ? (<div className='advertisment'><p>Advertisment Here</p></div>) : (<div><p>Premium account!</p></div>)}
+            <h1>Campaign Search</h1>
             <label htmlFor="cid">Campaign ID: </label>
             <input id="campaignID" type="text" name="cid" placeholder="Campaign ID" onChange={(e) => setCampaignID(e.target.value)} />
-            <button onClick={props.triggerReload}>Refresh</button>
-            {characterNodes}
+            <button onClick={(e) => triggerReloadView(!reloadView)}>Search!</button>
+            <button onClick={(e) => triggerReloadView(!reloadView)}>Refresh</button>
+            {content}
         </div>
     );
 };
@@ -436,13 +448,15 @@ const ChangePasswordWindow = () => {
             method="POST"
             className="mainForm"
         >
+            <h1>Account Settings: </h1>
+            <h3>Change Password:</h3>
             <label htmlFor="passOld">Old Password: </label>
-            <input id="passOld" type="password" name="passOld" placeholder="old password" />
+            <input id="passOld" type="password" name="passOld" placeholder="Old Password" />
             <label htmlFor="pass">New Password: </label>
-            <input id="pass" type="password" name="pass" placeholder="new password" />
-            <label htmlFor="pass2">New Password: </label>
-            <input id="pass2" type="password" name="pass2" placeholder="retype new password" />
-            <input className="formSubmit" type="submit" value="Sign in" />
+            <input id="pass" type="password" name="pass" placeholder="New Password" />
+            <label htmlFor="pass2">Retype New Password: </label>
+            <input id="pass2" type="password" name="pass2" placeholder="New Password" />
+            <input className="formSubmit" type="submit" value="Update Info" />
         </form>
     );
 };

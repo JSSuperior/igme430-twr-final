@@ -1,17 +1,18 @@
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>DomoMaker</title>
-  <link rel="shortcut icon" href="/assets/img/favicon.png"/>
-  <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
+  <link rel="shortcut icon" href="/assets/img/favicon.png" />
+  <link rel="stylesheet" type="text/css" href="/assets/style.css" />
 </head>
+
 <body>
-  <nav><a href="/login"><img id="logo" src="/assets/img/face.png" alt="face logo"/></a>
+  <nav><a href="/login"><img id="logo" src="/assets/img/face.png" alt="face logo" /></a>
+    <div class="navlink"><a id="characterButton" href="/maker">My Characters</a></div>
+    <div class="navlink"><a id="dmViewButton" href="/dmview">Campaign Search</a></div>
+    <div class="navlink"><a id="changePasswordButton" href="/changePassword">Account Settings</a></div>
     <div class="navlink"><a href="/logout">Log out</a></div>
-    <div class="navlink"><a id="changePasswordButton" href="/changePassword">Change password</a></div>
-    <div class="navlink"><a id="characterButton" href="/maker">Characters</a></div>
-    <div class="navlink"><a id="dmViewButton" href="/dmview">DM view</a></div>
-    <div id="premium"><input id="premiumCB" type="checkbox"/></div>
   </nav>
 
   <section id="app">
@@ -19,10 +20,11 @@
   </section>
 
   <div id="domoMessage" class='hidden'>
-    <img id="speech" src="/assets/img/speech.png" alt="speech box"/>
+    <img id="speech" src="/assets/img/speech.png" alt="speech box" />
     <h3><span id="errorMessage"></span></h3>
-    <img id="domo" src="assets/img/domo.png" alt="domo"/>
+    <img id="domo" src="assets/img/domo.png" alt="domo" />
   </div>
   <script src="/assets/appBundle.js"></script>
 </body>
+
 </html>

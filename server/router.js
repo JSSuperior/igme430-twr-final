@@ -33,6 +33,10 @@ const router = (app) => {
     app.get('/getByCampaign', mid.requiresLogin, controllers.Character.getCharactersByCampaign);
 
     app.get('/', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
+
+    // https://stackoverflow.com/questions/11500204/how-can-i-get-express-js-to-404-only-on-missing-routes
+    // https://github.com/expressjs/express/issues/6711
+    app.all('*fallback', controllers.NotFound.notFoundPage);
 };
 
 module.exports = router;

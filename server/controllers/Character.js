@@ -12,13 +12,14 @@ const dmPage = async (req, res) => {
 // creates initial character entry
 const createCharacter = async (req, res) => {
     // do checks for premium here
+    console.log(req.body);
 
     if (!req.body.name) {
         return res.status(400).json({ error: 'Name is required!' });
     }
 
     // if not premium and have 5 characters or more, then can't make any new ones
-    if (req.body.premium == false) {
+    if (req.body.premium === false) {
         const characters = await Character.find({ owner: req.session.account._id }).lean().exec();
         if (characters.length >= 5) {
             return res.status(500).json({ error: 'Non premium users cannot make more than 5 characters!' })
@@ -44,7 +45,7 @@ const createCharacter = async (req, res) => {
         await newCharacter.save();
         console.log(newCharacter);
         //return res.json({ redirect: '/maker' });
-        return res.status(201).json({ name: newCharacter.name });
+        return res.status(201).json({ message: 'Character successfully created!' });
     } catch (err) {
         console.log(err);
         if (err.code === 11000) {
@@ -56,12 +57,16 @@ const createCharacter = async (req, res) => {
 
 // 
 const editCharacter = async (req, res) => {
-    console.log(req.body.characterID);
+    //console.log(req.body.characterID);
+    //console.log(req.body);
 
-    if (!req.body.characterID || !req.body.name || !req.body.description
-        || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID || !req.body.strength || !req.body.agility
-        || !req.body.presence || !req.body.toughness || !req.body.omens || !req.body.weapon1 || !req.body.weapon2 || !req.body.armor || !req.body.equipment || !req.body.silver) {
-        return res.status(400).json({ error: 'Missing Fields' });
+    // if (!req.body.characterID || !req.body.name || !req.body.description
+    //     || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID || !req.body.strength || !req.body.agility
+    //     || !req.body.presence || !req.body.toughness || !req.body.omens || !req.body.weapon1 || !req.body.weapon2 || !req.body.armor || !req.body.equipment || !req.body.silver) {
+    //     return res.status(400).json({ error: 'Missing Fields' });
+    // }
+    if (!req.body.characterID) {
+        return res.status(400).json({ error: 'Missing character ID' });
     }
 
     // do i want to put this here or somewhere else in the code?
@@ -91,10 +96,11 @@ const editCharacter = async (req, res) => {
             }
         );
 
-        //return res.json({ redirect: '/maker' });
-        //return res.status(200).json({ message: 'Character updated!' });
-        console.log(character);
-        return res.status(200).json(character);
+        if(!character) {
+            return res.status(400).json({ error: 'Character not found!' });
+        }
+
+        return res.status(200).json({ message: 'Character successfully updated!' });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'An error occured editing character!' });
@@ -107,7 +113,6 @@ const removeCharacterFromCampaign = async (req, res) => {
         return res.status(400).json({ error: 'CharacterID is required!' });
     }
 
-    // const character = 
     try {
         await Character.findOneAndUpdate(
             { characterID: req.body.characterID },
@@ -136,10 +141,11 @@ const deleteCharacter = async (req, res) => {
         if (!theChosenOne) {
             return res.status(400).json({ error: `Character ${req.body.characterID} not found!` });
         }
-        return res.status(200).json({ message: `Character ${req.body.characterID} deleted!` });
+
+        return res.status(200).json({ message: `Character successfully ${req.body.characterID} deleted!` });
     } catch (err) {
         console.log(err);
-        return res.status(500).json({ error: 'An error occured deleting Character!' });
+        return res.status(500).json({ error: 'An error occured deleting character!' });
     }
 }
 
@@ -156,6 +162,10 @@ const getCharacterByID = async (req, res) => {
         // can probably change from doc to something else later
         const docs = await Character.findOne({ characterID: req.query.characterID }).lean().exec();
 
+        if(!docs) {
+            return res.status(400).json({ error: 'Character not found!' });
+        }
+
         return res.json({ character: docs });
     } catch (err) {
         console.log(err);
@@ -166,7 +176,7 @@ const getCharacterByID = async (req, res) => {
 // Gets array of character JSON objs by owner ID
 const getCharactersByUser = async (req, res) => {
     const query = { owner: req.session.account._id };
-    getCharacters(req, res, query);
+    getCharacters(req, res, query, 'No characters found!');
 }
 
 const getCharactersByCampaign = async (req, res) => {
@@ -175,15 +185,18 @@ const getCharactersByCampaign = async (req, res) => {
     }
 
     const query = { campaignID: req.query.campaignID };
-    getCharacters(req, res, query);
+    getCharacters(req, res, query, 'Campaign not found!');
 }
 
 // Returns array of character objs based on query
-const getCharacters = async (req, res, query) => {
+const getCharacters = async (req, res, query, message) => {
     try {
         const docs = await Character.find(query).lean().exec();
 
-        //console.log(docs);
+        if(!docs) {
+            return res.status(400).json({ error: message });
+        }
+
         return res.json({ characters: docs });
     } catch (err) {
         console.log(err);

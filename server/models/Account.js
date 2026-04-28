@@ -33,6 +33,10 @@ const AccountSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  // campaignIDList: {
+  //   type: [Number],
+  //   default: [],
+  // },
   createdDate: {
     type: Date,
     default: Date.now,

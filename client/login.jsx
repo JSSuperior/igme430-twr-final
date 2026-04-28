@@ -50,6 +50,8 @@ const LoginWindow = (props) => {
             method="POST"
             className="mainForm"
         >
+            <h1>MorkBorg Character Sheet Manager</h1>
+            <h3>Sign In:</h3>
             <label htmlFor="username">Username: </label>
             <input id="user" type="text" name="username" placeholder="username" />
             <label htmlFor="pass">Password: </label>
@@ -69,6 +71,7 @@ const SignupWindow = (props) => {
             method="POST"
             className="mainForm"
         >
+            <h1>Create Account</h1>
             <label htmlFor="username">Username: </label>
             <input id="user" type="text" name="username" placeholder="username" />
             <label htmlFor="pass">Password: </label>
