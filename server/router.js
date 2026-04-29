@@ -2,20 +2,14 @@ const controllers = require('./controllers');
 const mid = require('./middleware');
 
 const router = (app) => {
-    //
-    //app.get('/getDomos', mid.requiresLogin, controllers.Domo.getDomos);
-
     // account functionality
     app.get('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
     app.post('/login', mid.requiresSecure, mid.requiresLogout, controllers.Account.login);
-
-    // app.get('/changePass', mid.requiresSecure, mid.requiresLogout, controllers.Account.loginPage);
 
     app.post('/signup', mid.requiresSecure, mid.requiresLogout, controllers.Account.signup);
     app.get('/logout', mid.requiresLogin, controllers.Account.logout);
 
     // app handlebar views
-    //app.get('/dmview', mid.requiresLogin, controllers.Character.dmPage)
     app.get('/maker', mid.requiresLogin, controllers.Character.characterPage);
 
     // change password

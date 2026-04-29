@@ -1,25 +1,32 @@
 <html lang="en">
+
 <head>
-  <meta charset="utf-8"/>
-  <title>MorkBorg Character Creator</title>
-  <link rel="shortcut icon" href="/assets/img/favicon.png"/>
-  <link rel="stylesheet" type="text/css" href="/assets/style.css"/>
+  <meta charset="utf-8" />
+  <title>MorkBorg Character Manager</title>
+  <link rel="shortcut icon" href="/assets/img/favicon.png" />
+  <link rel="stylesheet" href="https://www.w3schools.com/w3css/5/w3.css">
 </head>
-<body> 
-  <nav><a href="/login"><img id="logo" src="/assets/img/face.png" alt="face logo"/></a>
-    <div class="navlink"><a id="loginButton" href="/login">Login</a></div>
-    <div class="navlink"><a id="signupButton" href="/signup">Sign up</a></div>
-  </nav>
-  
-  <section id="content">
 
-  </section>
+<body>
 
-  <div id="domoMessage" class='hidden'>
-    <img id="speech" src="/assets/img/speech.png" alt="speech box"/>
-    <h3><span id="errorMessage"></span></h3>
-    <img id="domo" src="assets/img/domo.png" alt="domo"/>
-  </div>
-  <script src="/assets/loginBundle.js"></script>
-</body>
+  <body style="background-color:#FFEB3B; color:#FFEB3B; margin-left: 50px; margin-right: 50px; min-width:800px;">
+    <div class="w3-top">
+      <div class="w3-bar w3-left-align w3-yellow">
+        <nav>
+          <a class="w3-bar-item w3-button w3-padding-large w3-hover-pink" href="/login">Home</a>
+          <a class="w3-bar-item w3-button w3-padding-large w3-hover-pink" id="loginButton" href="/login">Login</a>
+          <a class="w3-bar-item w3-button w3-padding-large w3-hover-pink" id="signupButton" href="/signup">Sign up</a>
+        </nav>
+      </div>
+    </div>
+
+    <div class="w3-container w3-black w3-center" style="margin-top:46px;min-height: 100vh;">
+      <section id="content">
+
+      </section>
+    </div>
+
+    <script src="/assets/loginBundle.js"></script>
+  </body>
+
 </html>

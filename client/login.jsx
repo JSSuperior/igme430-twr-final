@@ -2,6 +2,7 @@ const helper = require('./helper.js');
 const React = require('react');
 const { createRoot } = require('react-dom/client');
 
+// logs in user with post assuming info is right
 const handleLogin = (e) => {
     e.preventDefault();
     helper.hideError();
@@ -18,6 +19,7 @@ const handleLogin = (e) => {
     return false;
 }
 
+// signs user up with post assuming info is right
 const handleSignup = (e) => {
     e.preventDefault();
     helper.hideError();
@@ -41,48 +43,65 @@ const handleSignup = (e) => {
     return false;
 }
 
+// log in window
 const LoginWindow = (props) => {
     return (
-        <form id="loginForm"
-            name="loginForm"
-            onSubmit={handleLogin}
-            action="/login"
-            method="POST"
-            className="mainForm"
-        >
+        <div>
             <h1>MorkBorg Character Sheet Manager</h1>
-            <h3>Sign In:</h3>
-            <label htmlFor="username">Username: </label>
-            <input id="user" type="text" name="username" placeholder="username" />
-            <label htmlFor="pass">Password: </label>
-            <input id="pass" type="password" name="pass" placeholder="password" />
-            <input className="formSubmit" type="submit" value="Sign in" />
+            <div class="w3-container w3-yellow" style={{ marginLeft: "100px", marginRight: "100px", marginTop: "20", height: "50px" }}>
+                <h3>Sign In: </h3>
+            </div>
+            <div class="w3-container w3-center w3-light-gray" style={{ marginLeft: "100px", marginRight: "100px", height: "154px" }}>
+                <form id="loginForm"
+                    name="loginForm"
+                    onSubmit={handleLogin}
+                    action="/login"
+                    method="POST"
+                    className="mainForm"
+                >
 
-        </form>
+                    <div className="w3-flex" style={{ gap: "8px", flexDirection: "column", marginTop: "8px" }}>
+                        <input className="w3-input w3-border" id="user" type="text" name="username" placeholder="Username" />
+                        <input className="w3-input w3-border" id="pass" type="password" name="pass" placeholder="Password" />
+                        <input className="w3-button w3-pink" type="submit" value="Sign in" />
+                    </div>
+                </form>
+            </div>
+            <h3><span id="errorMessage"></span></h3>
+        </div>
     );
 };
 
+// sign up window
 const SignupWindow = (props) => {
     return (
-        <form id="signupForm"
-            name="signupForm"
-            onSubmit={handleSignup}
-            action="/signup"
-            method="POST"
-            className="mainForm"
-        >
-            <h1>Create Account</h1>
-            <label htmlFor="username">Username: </label>
-            <input id="user" type="text" name="username" placeholder="username" />
-            <label htmlFor="pass">Password: </label>
-            <input id="pass" type="password" name="pass" placeholder="password" />
-            <label htmlFor="pass2">Password: </label>
-            <input id="pass2" type="password" name="pass2" placeholder="retype password" />
-            <input className="formSubmit" type="submit" value="Sign in" />
-        </form>
+        <div>
+            <div class="w3-container w3-yellow" style={{ marginLeft: "100px", marginRight: "100px", marginTop: "20", height: "50px" }}>
+                <h3>Create Account: </h3>
+            </div>
+            <div class="w3-container w3-center w3-light-gray" style={{ marginLeft: "100px", marginRight: "100px", height: "200px" }}>
+                <form id="signupForm"
+                    name="signupForm"
+                    onSubmit={handleSignup}
+                    action="/signup"
+                    method="POST"
+                    className="mainForm"
+                >
+
+                    <div className="w3-flex" style={{ gap: "8px", flexDirection: "column", marginTop: "8px" }}>
+                        <input className="w3-input w3-border" id="user" type="text" name="username" placeholder="Username" />
+                        <input className="w3-input w3-border" id="pass" type="password" name="pass" placeholder="Password" />
+                        <input className="w3-input w3-border" id="pass2" type="password" name="pass2" placeholder="Retype Password" />
+                        <input className="w3-button w3-pink" type="submit" value="Sign in" />
+                    </div>
+                </form>
+            </div>
+            <h3><span id="errorMessage"></span></h3>
+        </div>
     );
 };
 
+// handles rendering
 const init = () => {
     const loginButton = document.getElementById('loginButton');
     const signupButton = document.getElementById('signupButton');

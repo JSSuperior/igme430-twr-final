@@ -1,19 +1,18 @@
 const models = require('../models');
 const Account = models.Account;
 
+// render login page
 const loginPage = (req, res) => {
     return res.render('login');
 };
 
-// const changePasswordPage = (req, res) => {
-//     return res.render('login');
-// };
-
+// kill session and redirect to login
 const logout = (req, res) => {
     req.session.destroy();
     return res.redirect('/');
 };
 
+// login user
 const login = (req, res) => {
     const username = `${req.body.username}`;
     const pass = `${req.body.pass}`;
@@ -28,12 +27,12 @@ const login = (req, res) => {
         }
 
         req.session.account = Account.toAPI(account);
-        console.log(account);
 
         return res.json({ redirect: '/maker' });
     });
 };
 
+// sign up user, create account and redirect to main maker page
 const signup = async (req, res) => {
     const username = `${req.body.username}`;
     const pass = `${req.body.pass}`;
@@ -62,8 +61,8 @@ const signup = async (req, res) => {
     }
 };
 
+// 
 const changePassword = async (req, res) => {
-    //const username = `${req.body.username}`
     const passOld = `${req.body.passOld}`;
     const pass = `${req.body.pass}`;
     const pass2 = `${req.body.pass2}`;
@@ -83,9 +82,10 @@ const changePassword = async (req, res) => {
         return res.status(400).json({ error: 'Old password and new password cannot be the same' });
     }
 
+    // hash new password and set it
     try {
         const hash = await Account.generateHash(pass);
-        const currentAccount = await Account.findOneAndUpdate(
+        await Account.findOneAndUpdate(
             { _id: req.session.account._id },
             {
                 $set: {
@@ -94,8 +94,7 @@ const changePassword = async (req, res) => {
             }
         );
 
-        //console.log(currentAccount);
-        return res.json({ redirect: '/maker' });
+        return res.status(200).json({ message: 'Password successfully updated!' });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'An error occured updating password!' });

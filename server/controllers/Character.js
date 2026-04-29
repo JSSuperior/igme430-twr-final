@@ -1,19 +1,13 @@
 const models = require('../models');
 const Character = models.Character;
 
+// renders main page
 const characterPage = async (req, res) => {
     return res.render('app');
 }
 
-const dmPage = async (req, res) => {
-    return res.render('dmview');
-}
-
 // creates initial character entry
 const createCharacter = async (req, res) => {
-    // do checks for premium here
-    console.log(req.body);
-
     if (!req.body.name) {
         return res.status(400).json({ error: 'Name is required!' });
     }
@@ -26,8 +20,7 @@ const createCharacter = async (req, res) => {
         }
     }
 
-    // find a way to randomly generate unique character ID here
-    // help from this stack overflow article
+    // help from this stack overflow article for generating unique character IDs
     // https://stackoverflow.com/questions/37174096/generate-unique-ids-js
     const generateUniqueCharacterID = () => {
         return Date.now();
@@ -43,7 +36,7 @@ const createCharacter = async (req, res) => {
     try {
         const newCharacter = new Character(characterData);
         await newCharacter.save();
-        console.log(newCharacter);
+        //console.log(newCharacter);
         //return res.json({ redirect: '/maker' });
         return res.status(201).json({ message: 'Character successfully created!' });
     } catch (err) {
@@ -55,22 +48,20 @@ const createCharacter = async (req, res) => {
     }
 }
 
-// 
+// edits character's data
 const editCharacter = async (req, res) => {
-    //console.log(req.body.characterID);
-    //console.log(req.body);
-
     // if (!req.body.characterID || !req.body.name || !req.body.description
     //     || !req.body.characterClass || !req.body.powers || !req.body.hitpoints || !req.body.campaignID || !req.body.strength || !req.body.agility
     //     || !req.body.presence || !req.body.toughness || !req.body.omens || !req.body.weapon1 || !req.body.weapon2 || !req.body.armor || !req.body.equipment || !req.body.silver) {
     //     return res.status(400).json({ error: 'Missing Fields' });
     // }
+
+    // I want the user to be able to leave entries blank but I don't think this is the way to do that
     if (!req.body.characterID) {
         return res.status(400).json({ error: 'Missing character ID' });
     }
 
-    // do i want to put this here or somewhere else in the code?
-
+    // try to change data
     try {
         const character = await Character.findOneAndUpdate(
             { characterID: req.body.characterID },
@@ -97,7 +88,7 @@ const editCharacter = async (req, res) => {
         );
 
         if(!character) {
-            return res.status(400).json({ error: 'Character not found!' });
+            return res.status(404).json({ error: 'Character not found!' });
         }
 
         return res.status(200).json({ message: 'Character successfully updated!' });
@@ -107,12 +98,13 @@ const editCharacter = async (req, res) => {
     }
 }
 
-// Removes character with ID from a campaign
+// removes character with ID from a campaign
 const removeCharacterFromCampaign = async (req, res) => {
     if (!req.body.characterID) {
         return res.status(400).json({ error: 'CharacterID is required!' });
     }
 
+    // try to set character's campaignID to blank
     try {
         await Character.findOneAndUpdate(
             { characterID: req.body.characterID },
@@ -129,17 +121,18 @@ const removeCharacterFromCampaign = async (req, res) => {
     }
 }
 
-// Deletes character with specific ID from database
+// deletes character with specific ID from database
 const deleteCharacter = async (req, res) => {
     if (!req.body.characterID) {
         return res.status(400).json({ error: 'CharacterID is required!' });
     }
 
+    // try to delete character
     try {
         const theChosenOne = await Character.findOneAndDelete({ characterID: req.body.characterID });
 
         if (!theChosenOne) {
-            return res.status(400).json({ error: `Character ${req.body.characterID} not found!` });
+            return res.status(404).json({ error: `Character ${req.body.characterID} not found!` });
         }
 
         return res.status(200).json({ message: `Character successfully ${req.body.characterID} deleted!` });
@@ -151,34 +144,31 @@ const deleteCharacter = async (req, res) => {
 
 // returns JSON obj of character with specific ID
 const getCharacterByID = async (req, res) => {
-    // change this to be a query param
     if (!req.query.characterID) {
         return res.status(400).json({ error: 'Character ID is required!' });
     }
 
-    console.log(req.query.characterID);
-
     try {
-        // can probably change from doc to something else later
-        const docs = await Character.findOne({ characterID: req.query.characterID }).lean().exec();
+        const doc = await Character.findOne({ characterID: req.query.characterID }).lean().exec();
 
-        if(!docs) {
-            return res.status(400).json({ error: 'Character not found!' });
+        if(!doc) {
+            return res.status(404).json({ error: 'Character not found!' });
         }
 
-        return res.json({ character: docs });
+        return res.json({ character: doc });
     } catch (err) {
         console.log(err);
         return res.status(500).json({ error: 'Error retrieving character!' });
     }
 }
 
-// Gets array of character JSON objs by owner ID
+// returns array of character JSON objs by owner ID
 const getCharactersByUser = async (req, res) => {
     const query = { owner: req.session.account._id };
     getCharacters(req, res, query, 'No characters found!');
 }
 
+// returns array of character JSON objs by campaign ID
 const getCharactersByCampaign = async (req, res) => {
     if (!req.query.campaignID) {
         return res.status(400).json({ error: 'Campaign ID is required!' });
@@ -188,13 +178,13 @@ const getCharactersByCampaign = async (req, res) => {
     getCharacters(req, res, query, 'Campaign not found!');
 }
 
-// Returns array of character objs based on query
+// returns array of character objs based on query
 const getCharacters = async (req, res, query, message) => {
     try {
         const docs = await Character.find(query).lean().exec();
 
-        if(!docs) {
-            return res.status(400).json({ error: message });
+        if(docs.length < 1) {
+            return res.status(404).json({ error: message });
         }
 
         return res.json({ characters: docs });
@@ -206,7 +196,6 @@ const getCharacters = async (req, res, query, message) => {
 
 module.exports = {
     characterPage,
-    dmPage,
     createCharacter,
     editCharacter,
     deleteCharacter,

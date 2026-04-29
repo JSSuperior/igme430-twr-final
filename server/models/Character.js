@@ -23,7 +23,6 @@ const characterSchema = new mongoose.Schema({
         type: String,
         default: "",
     },
-    // maybe add a field to track uses?
     hitpoints: {
         type: String,
         default: "0/0",
@@ -74,7 +73,6 @@ const characterSchema = new mongoose.Schema({
     },
 
     // admin
-    // eventually if scoped right, I want to make it so that players can add their characters to a campaign
     characterID: {
         type: Number,
         required: true,
@@ -82,7 +80,6 @@ const characterSchema = new mongoose.Schema({
     },
     campaignID: {
         type: String,
-        //required: true
     },
     owner: {
         type: mongoose.Schema.ObjectId,
@@ -95,7 +92,6 @@ const characterSchema = new mongoose.Schema({
     },
 });
 
-// look into this more later
 characterSchema.statics.toAPI = (doc) => ({
     name: doc.name,
 });

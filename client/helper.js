@@ -3,14 +3,17 @@
    end in an error.
 */
 const handleError = (message) => {
-  document.getElementById('errorMessage').textContent = message;
-  document.getElementById('domoMessage').classList.remove('hidden');
+  const widget = document.getElementById('errorMessage');
+  widget.style.color = "#E91E63";
+  widget.textContent = message;
+  //document.getElementById('domoMessage').classList.remove('hidden');
 };
 
+// takes in message and displays it. Used for non-error messages.
 const handleMessage = (message) => {
-  // later add its own html element
-  document.getElementById('errorMessage').textContent = message;
-  document.getElementById('domoMessage').classList.remove('hidden');
+  const widget = document.getElementById('errorMessage');
+  widget.style.color = "#00F200";
+  widget.textContent = message;
 };
 
 /* Sends post requests to the server using fetch. Will look for various
@@ -26,7 +29,7 @@ const sendPost = async (url, data, handler) => {
   });
 
   const result = await response.json();
-  document.getElementById('domoMessage').classList.add('hidden');
+  const widget = document.getElementById('errorMessage').textContent = "";
 
   if(result.redirect) {
     window.location = result.redirect;
@@ -46,11 +49,11 @@ const sendPost = async (url, data, handler) => {
 };
 
 const hideError = () => {
-  document.getElementById('domoMessage').classList.add('hidden');
+  const widget = document.getElementById('errorMessage').textContent = "";
 };
 
 const hideMessage = () => {
-  document.getElementById('domoMessage').classList.add('hidden');
+  const widget = document.getElementById('errorMessage').textContent = "";
 };
 
 module.exports = {

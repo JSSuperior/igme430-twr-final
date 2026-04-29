@@ -1,7 +1,7 @@
-const helper = require('./helper.js');
 const React = require('react');
 const { createRoot } = require('react-dom/client');
 
+// not found page
 const NotFoundWindow = () => {
     return(
         <div id="notFound">
@@ -10,6 +10,7 @@ const NotFoundWindow = () => {
     );
 }
 
+// render not found page
 const init = () => {
     const root = createRoot(document.getElementById('content'));
 
